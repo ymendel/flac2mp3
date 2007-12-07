@@ -10,28 +10,24 @@ rescue LoadError
 end
 
 require 'optparse'
+require 'flac2mp3'
 
 # NOTE: the option -p/--path= is given as an example, and should probably be replaced in your application.
 
-OPTIONS = {
-  :path     => '~'
-}
-MANDATORY_OPTIONS = %w(  )
+OPTIONS = {}
+MANDATORY_OPTIONS = %w[]
 
 parser = OptionParser.new do |opts|
   opts.banner = <<BANNER
-This application is wonderful because...
-
-Usage: #{File.basename($0)} [options]
+Usage: #{File.basename($0)} [filename]
 
 Options are:
 BANNER
-  opts.separator ""
-  opts.on("-p", "--path=PATH", String,
-          "The root path for selecting files",
-          "Default: ~") { |OPTIONS[:path]| }
-  opts.on("-h", "--help",
-          "Show this help message.") { puts opts; exit }
+  opts.separator ''
+  opts.on('-v', '--version',
+          "Show the #{File.basename($0)} version number and exit") { puts "flac2mp3 #{Flac2mp3::VERSION::STRING}"; exit }
+  opts.on('-h', '--help',
+          'Show this help message.') { puts opts; exit }
   opts.parse!(ARGV)
 
   if MANDATORY_OPTIONS && MANDATORY_OPTIONS.find { |option| OPTIONS[option.to_sym].nil? }
@@ -39,6 +35,12 @@ BANNER
   end
 end
 
-path = OPTIONS[:path]
-
 # do stuff
+filename = ARGV[0]
+
+unless filename
+  puts "Usage: #{File.basename($0)} [filename]"
+  exit
+end
+
+Flac2mp3.convert(filename)
