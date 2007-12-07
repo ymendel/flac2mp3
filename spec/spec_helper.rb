@@ -6,6 +6,7 @@ rescue LoadError
   require 'spec'
 end
 
+# this is my favorite way to require ever
 begin
   require 'mocha'
 rescue LoadError

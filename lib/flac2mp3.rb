@@ -6,7 +6,8 @@ module Flac2mp3
     def convert(filename)
       raise TypeError unless FileTest.file?(filename)
       filename.extend(Flac2mp3::StringExtensions)
-      output_filename(filename)
+      out_file = output_filename(filename)
+      out_file.extend(Flac2mp3::StringExtensions)
     end
     
     def output_filename(filename)

@@ -45,6 +45,13 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
     Flac2mp3.expects(:output_filename).with(@filename)
     Flac2mp3.convert(@filename)
   end
+  
+  it 'should extend the output filename with the string extensions' do
+    @output_filename = 'blah.mp3'
+    Flac2mp3.stubs(:output_filename).with(@filename).returns(@output_filename)
+    @output_filename.expects(:extend).with(Flac2mp3::StringExtensions)
+    Flac2mp3.convert(@filename)
+  end
 end
 
 describe Flac2mp3, 'when converting and given a filename not belonging to a regular file' do
