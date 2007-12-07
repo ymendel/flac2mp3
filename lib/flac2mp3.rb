@@ -1,5 +1,6 @@
 $:.unshift File.dirname(__FILE__)
 require 'flac2mp3/string_extensions'
+require 'flacinfo'
 
 module Flac2mp3
   class << self
@@ -26,6 +27,15 @@ module Flac2mp3
         :title       => :title,
         :tracknumber => :tracknum
       }
+    end
+    
+    def flacdata(filename)
+      data = FlacInfo.new(filename)
+      data.tags.inject({}) do |hash, (key, value)|
+        value = value.to_i if value.respond_to(:match) and value.match(/^\d+$/)
+        hash[key.to_s.downcase.to_sym] = value
+        hash
+      end
     end
   end
 end

@@ -12,6 +12,10 @@ describe Flac2mp3 do
   it 'should provide tag mapping' do
     Flac2mp3.should respond_to(:tag_mapping)
   end
+  
+  it 'should get FLAC tag data' do
+    Flac2mp3.should respond_to(:flacdata)
+  end
 end
 
 describe Flac2mp3, 'when converting' do
@@ -126,5 +130,80 @@ describe Flac2mp3, 'providing a mapping of tags' do
   
   it "should map 'tracknumber' to 'tracknum'" do
     Flac2mp3.tag_mapping[:tracknumber].should == :tracknum
+  end
+end
+
+describe Flac2mp3, 'when getting FLAC tag data' do
+  before :each do
+    @filename = 'blah.flac'
+    @tags = {}
+    @flacinfo = stub('flacinfo', :tags => @tags)
+    FlacInfo.stubs(:new).with(@filename).returns(@flacinfo)
+  end
+  
+  it 'should require a filename' do
+    lambda { Flac2mp3.flacdata }.should raise_error(ArgumentError)
+  end
+  
+  it 'should accept a filename' do
+    lambda { Flac2mp3.flacdata('blah.flac') }.should_not raise_error(ArgumentError)
+  end
+  
+  it 'should create a FlacInfo object' do
+    FlacInfo.expects(:new).with(@filename).returns(@flacinfo)
+    Flac2mp3.flacdata(@filename)
+  end
+  
+  it 'should use the FlacInfo object tags' do
+    @flacinfo.expects(:tags).returns(@tags)
+    Flac2mp3.flacdata(@filename)
+  end
+  
+  it 'should return a hash of the tag data' do
+    @tags[:artist] = 'blah'
+    @tags[:blah] = 'boo'
+    @tags[:comment] = 'hey'
+    
+    data = Flac2mp3.flacdata(@filename)
+    data[:artist].should == 'blah'
+    data[:blah].should == 'boo'
+    data[:comment].should == 'hey'
+  end
+  
+  it 'should convert tags to symbols' do
+    @tags['artist'] = 'blah'
+    @tags['blah'] = 'boo'
+    @tags['comment'] = 'hey'
+    
+    data = Flac2mp3.flacdata(@filename)
+    data[:artist].should == 'blah'
+    data[:blah].should == 'boo'
+    data[:comment].should == 'hey'
+    
+    data.should_not have_key('artist')
+    data.should_not have_key('blah')
+    data.should_not have_key('comment')
+  end
+  
+  it 'should convert tags to lowercase' do
+    @tags['Artist'] = 'blah'
+    @tags[:BLAH] = 'boo'
+    @tags['cOmMeNt'] = 'hey'
+    
+    data = Flac2mp3.flacdata(@filename)
+    data[:artist].should == 'blah'
+    data[:blah].should == 'boo'
+    data[:comment].should == 'hey'
+    
+    data.should_not have_key('Artist')
+    data.should_not have_key(:BLAH)
+    data.should_not have_key('cOmMeNt')
+  end
+  
+  it 'should convert values consisting only of digits to actual numbers' do
+    @tags[:track] = '12'
+    
+    data = Flac2mp3.flacdata(@filename)
+    data[:track].should == 12
   end
 end
