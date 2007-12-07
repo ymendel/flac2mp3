@@ -7,14 +7,17 @@ bin/flac2mp3
 config/hoe.rb
 config/requirements.rb
 lib/flac2mp3.rb
+lib/flac2mp3/string_extensions.rb
 lib/flac2mp3/version.rb
 log/debug.log
 script/destroy
 script/generate
 setup.rb
+spec/flac2mp3_command_spec.rb
 spec/flac2mp3_spec.rb
 spec/spec.opts
 spec/spec_helper.rb
+spec/string_extensions_spec.rb
 tasks/deployment.rake
 tasks/environment.rake
 tasks/rspec.rake
