@@ -8,6 +8,10 @@ describe Flac2mp3 do
   it 'should provide output filename' do
     Flac2mp3.should respond_to(:output_filename)
   end
+  
+  it 'should provide tag mapping' do
+    Flac2mp3.should respond_to(:tag_mapping)
+  end
 end
 
 describe Flac2mp3, 'when converting' do
@@ -80,5 +84,47 @@ describe Flac2mp3, 'when getting an output filename' do
   
   it 'should append an .mp3 extension if no .flac extension exists' do
     Flac2mp3.output_filename('blah').should == 'blah.mp3'
+  end
+end
+
+describe Flac2mp3, 'providing a mapping of tags' do
+  it 'should return a hash' do
+    Flac2mp3.tag_mapping.should be_kind_of(Hash)
+  end
+  
+  it "should map 'album' to 'album'" do
+    Flac2mp3.tag_mapping[:album].should == :album
+  end
+  
+  it "should map 'artist' to 'artist'" do
+    Flac2mp3.tag_mapping[:artist].should == :artist
+  end
+  
+  it "should map 'bpm' to 'bpm'" do
+    Flac2mp3.tag_mapping[:bpm].should == :bpm
+  end
+  
+  it "should map 'comment' to 'comments'" do
+    Flac2mp3.tag_mapping[:comment].should == :comments
+  end
+  
+  it "should map 'composer' to 'composer'" do
+    Flac2mp3.tag_mapping[:composer].should == :composer
+  end
+  
+  it "should map 'date' to 'year'" do
+    Flac2mp3.tag_mapping[:date].should == :year
+  end
+  
+  it "should map 'genre' to 'genre_s'" do
+    Flac2mp3.tag_mapping[:genre].should == :genre_s
+  end
+  
+  it "should map 'title' to 'title'" do
+    Flac2mp3.tag_mapping[:title].should == :title
+  end
+  
+  it "should map 'tracknumber' to 'tracknum'" do
+    Flac2mp3.tag_mapping[:tracknumber].should == :tracknum
   end
 end

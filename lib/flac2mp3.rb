@@ -13,5 +13,19 @@ module Flac2mp3
     def output_filename(filename)
       filename.chomp('.flac') + '.mp3'
     end
+    
+    def tag_mapping
+      {
+        :album       => :album,
+        :artist      => :artist,
+        :bpm         => :bpm,
+        :comment     => :comments,
+        :composer    => :composer,
+        :date        => :year,
+        :genre       => :genre_s,
+        :title       => :title,
+        :tracknumber => :tracknum
+      }
+    end
   end
 end
