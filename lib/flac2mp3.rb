@@ -1,14 +1,19 @@
 $:.unshift File.dirname(__FILE__)
 require 'flac2mp3/string_extensions'
 require 'flacinfo'
+require 'mp3info'
 
 module Flac2mp3
   class << self
     def convert(filename)
-      raise TypeError unless FileTest.file?(filename)
+      raise TypeError, "'#{filename}' is not a file" unless FileTest.file?(filename)
       filename.extend(Flac2mp3::StringExtensions)
-      out_file = output_filename(filename)
-      out_file.extend(Flac2mp3::StringExtensions)
+      out_filename = output_filename(filename)
+      out_filename.extend(Flac2mp3::StringExtensions)
+      
+      system "flac -c -d #{filename.safequote} | lame --preset standard - #{out_filename.safequote}"
+      
+      mp3data(out_filename, flacdata(filename))
     end
     
     def output_filename(filename)
@@ -35,6 +40,16 @@ module Flac2mp3
         value = value.to_i if value.respond_to(:match) and value.match(/^\d+$/)
         hash[key.to_s.downcase.to_sym] = value
         hash
+      end
+    end
+    
+    def mp3data(filename, tags)
+      raise TypeError, "Tags must be a hash" unless tags.is_a?(Hash)
+      Mp3Info.open(filename) do |mp3|
+        tags.each do |key, value|
+          next unless mp3tag = tag_mapping[key]
+          mp3.tag.send("#{mp3tag}=", value)
+        end
       end
     end
   end

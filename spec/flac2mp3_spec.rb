@@ -16,9 +16,19 @@ describe Flac2mp3 do
   it 'should get FLAC tag data' do
     Flac2mp3.should respond_to(:flacdata)
   end
+  
+  it 'should set MP3 tag data' do
+    Flac2mp3.should respond_to(:mp3data)
+  end
 end
 
 describe Flac2mp3, 'when converting' do
+  before :each do
+    Flac2mp3.stubs(:system)
+    Flac2mp3.stubs(:flacdata)
+    Flac2mp3.stubs(:mp3data)
+  end
+
   it 'should require a filename' do
     lambda { Flac2mp3.convert }.should raise_error(ArgumentError)
   end
@@ -38,6 +48,13 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
   before :each do
     @filename = 'blah.flac'
     FileTest.stubs(:file?).with(@filename).returns(true)
+    @output_filename = 'blah.mp3'
+    Flac2mp3.stubs(:output_filename).with(@filename).returns(@output_filename)
+    Flac2mp3.stubs(:system)
+    
+    @flacdata = {}
+    Flac2mp3.stubs(:flacdata).with(@filename).returns(@flacdata)
+    Flac2mp3.stubs(:mp3data)
   end
   
   it 'should not error' do
@@ -45,19 +62,32 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
   end
   
   it 'should extend the filename with the string extensions' do
-    @filename.expects(:extend).with(Flac2mp3::StringExtensions)
+    @filename.expects(:extend).with(Flac2mp3::StringExtensions).returns(@filename)
+    @filename.stubs(:safequote)
     Flac2mp3.convert(@filename)
   end
   
   it 'should get the output filename' do
-    Flac2mp3.expects(:output_filename).with(@filename)
+    Flac2mp3.expects(:output_filename).with(@filename).returns('outfile')
     Flac2mp3.convert(@filename)
   end
   
   it 'should extend the output filename with the string extensions' do
-    @output_filename = 'blah.mp3'
-    Flac2mp3.stubs(:output_filename).with(@filename).returns(@output_filename)
-    @output_filename.expects(:extend).with(Flac2mp3::StringExtensions)
+    @output_filename.expects(:extend).with(Flac2mp3::StringExtensions).returns(@output_filename)
+    @output_filename.stubs(:safequote)
+    Flac2mp3.convert(@filename)
+  end
+  
+  it 'should use system commands to convert the FLAC to an MP3' do
+    @filename.stubs(:safequote).returns('-blah-flac-')
+    @output_filename.stubs(:safequote).returns('-blah-mp3-')
+    Flac2mp3.expects(:system).with("flac -c -d #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
+    
+    Flac2mp3.convert(@filename)
+  end
+  
+  it 'should set the MP3 tags from the FLAC data' do
+    Flac2mp3.expects(:mp3data).with(@output_filename, @flacdata)
     Flac2mp3.convert(@filename)
   end
 end
@@ -205,5 +235,78 @@ describe Flac2mp3, 'when getting FLAC tag data' do
     
     data = Flac2mp3.flacdata(@filename)
     data[:track].should == 12
+  end
+end
+
+describe Flac2mp3, 'when setting MP3 tag data' do
+  before :each do
+    @filename = 'blah.mp3'
+    @tags = {}
+    @mp3tags = stub('mp3info tags')
+    @mp3info = stub('mp3info obj', :tag => @mp3tags)
+    Mp3Info.stubs(:open).with(@filename).yields(@mp3info)
+  end
+  
+  it 'should require a filename' do
+    lambda { Flac2mp3.mp3data }.should raise_error(ArgumentError)
+  end
+  
+  it 'should require tag data' do
+    lambda { Flac2mp3.mp3data('blah.mp3') }.should raise_error(ArgumentError)
+  end
+  
+  it 'should accept a filename and tag data' do
+    lambda { Flac2mp3.mp3data('blah.mp3', 'tags') }.should_not raise_error(ArgumentError)
+  end
+  
+  it 'should require a hash of tags' do
+    lambda { Flac2mp3.mp3data('blah.mp3', 'blah') }.should raise_error(TypeError)
+  end
+  
+  it 'should accept a hash of tags' do
+    lambda { Flac2mp3.mp3data('blah.mp3', {}) }.should_not raise_error(TypeError)
+  end
+  
+  it 'should use an Mp3Info object' do
+    Mp3Info.expects(:open).with(@filename).yields(@mp3info)
+    Flac2mp3.mp3data(@filename, @tags)
+  end
+  
+  it 'should set tags in the Mp3Info object' do
+    @tags[:album] = 'blah'
+    @tags[:artist] = 'boo'
+    @tags[:genre] = 'bang'
+    
+    @mp3tags.expects(:album=).with(@tags[:album])
+    @mp3tags.expects(:artist=).with(@tags[:artist])
+    @mp3tags.expects(:genre_s=).with(@tags[:genre])
+    
+    Flac2mp3.mp3data(@filename, @tags)
+  end
+  
+  it 'should not set tags not given' do
+    @tags[:album] = 'blah'
+    @tags[:artist] = 'boo'
+    @tags[:genre] = 'bang'
+    
+    @mp3tags.stubs(:album=)
+    @mp3tags.stubs(:artist=)
+    @mp3tags.stubs(:genre_s=)
+    
+    @mp3tags.expects(:bpm=).never
+    @mp3tags.expects(:comments=).never
+    @mp3tags.expects(:year=).never
+    
+    Flac2mp3.mp3data(@filename, @tags)
+  end
+  
+  it 'should not set tags not known' do
+    @tags[:blah] = 'blah'
+    @tags[:bang] = 'bang'
+    
+    @mp3tags.expects(:blah=).never
+    @mp3tags.expects(:bang=).never
+    
+    Flac2mp3.mp3data(@filename, @tags)
   end
 end
