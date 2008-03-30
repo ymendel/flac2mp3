@@ -1,3 +1,8 @@
+== 0.2.1 2008-03-30
+
+* 1 bug fix:
+  * Numeric track titles were converted to integers, which caused setting the MP3 data (using ruby-mp3info) to raise an exception. They are now left as strings.
+
 == 0.2.0 2007-12-07
 
 * 1 major enhancement:
