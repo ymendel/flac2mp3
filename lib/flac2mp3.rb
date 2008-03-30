@@ -37,8 +37,10 @@ module Flac2mp3
     def flacdata(filename)
       data = FlacInfo.new(filename)
       data.tags.inject({}) do |hash, (key, value)|
+        key = key.to_s.downcase.to_sym
         value = value.to_i if value.respond_to?(:match) and value.match(/^\d+$/)
-        hash[key.to_s.downcase.to_sym] = value
+        value = value.to_s if key == :title
+        hash[key] = value
         hash
       end
     end

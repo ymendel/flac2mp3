@@ -236,6 +236,20 @@ describe Flac2mp3, 'when getting FLAC tag data' do
     data = Flac2mp3.flacdata(@filename)
     data[:track].should == 12
   end
+  
+  it 'should leave numeric titles as strings' do
+    @tags[:title] = '45'  # This was my first run-in with this problem, the opening track on Elvis Costello's /When I Was Cruel/
+    
+    data = Flac2mp3.flacdata(@filename)
+    data[:title].should == '45'
+  end
+  
+  it 'should leave numeric titles as strings even if the title key is not a simple downcased symbol' do
+    @tags['TITLE'] = '45'
+    
+    data = Flac2mp3.flacdata(@filename)
+    data[:title].should == '45'
+  end
 end
 
 describe Flac2mp3, 'when setting MP3 tag data' do
