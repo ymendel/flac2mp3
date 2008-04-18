@@ -134,8 +134,8 @@ describe Flac2mp3, 'providing a mapping of tags' do
     Flac2mp3.tag_mapping[:artist].should == :artist
   end
   
-  it "should map 'bpm' to 'bpm'" do
-    Flac2mp3.tag_mapping[:bpm].should == :bpm
+  it "should map 'bpm' to 'TBPM'" do
+    Flac2mp3.tag_mapping[:bpm].should == :TBPM
   end
   
   it "should map 'comment' to 'comments'" do
@@ -257,7 +257,8 @@ describe Flac2mp3, 'when setting MP3 tag data' do
     @filename = 'blah.mp3'
     @tags = {}
     @mp3tags = stub('mp3info tags')
-    @mp3info = stub('mp3info obj', :tag => @mp3tags)
+    @mp3tags2 = stub('mp3info tags 2')
+    @mp3info = stub('mp3info obj', :tag => @mp3tags, :tag2 => @mp3tags2)
     Mp3Info.stubs(:open).with(@filename).yields(@mp3info)
   end
   
@@ -307,9 +308,9 @@ describe Flac2mp3, 'when setting MP3 tag data' do
     @mp3tags.stubs(:artist=)
     @mp3tags.stubs(:genre_s=)
     
-    @mp3tags.expects(:bpm=).never
     @mp3tags.expects(:comments=).never
     @mp3tags.expects(:year=).never
+    @mp3tags.expects(:tracknum=).never
     
     Flac2mp3.mp3data(@filename, @tags)
   end
@@ -320,6 +321,14 @@ describe Flac2mp3, 'when setting MP3 tag data' do
     
     @mp3tags.expects(:blah=).never
     @mp3tags.expects(:bang=).never
+    
+    Flac2mp3.mp3data(@filename, @tags)
+  end
+  
+  it 'should use tag2 for bpm' do
+    @tags[:bpm] = '5'
+    
+    @mp3tags2.expects(:TBPM=).with(@tags[:bpm])
     
     Flac2mp3.mp3data(@filename, @tags)
   end

@@ -24,7 +24,7 @@ module Flac2mp3
       {
         :album       => :album,
         :artist      => :artist,
-        :bpm         => :bpm,
+        :bpm         => :TBPM,
         :comment     => :comments,
         :composer    => :composer,
         :date        => :year,
@@ -50,7 +50,9 @@ module Flac2mp3
       Mp3Info.open(filename) do |mp3|
         tags.each do |key, value|
           next unless mp3tag = tag_mapping[key]
-          mp3.tag.send("#{mp3tag}=", value)
+          tag = mp3.tag
+          tag = mp3.tag2 if key == :bpm
+          tag.send("#{mp3tag}=", value)
         end
       end
     end
