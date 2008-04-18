@@ -1,3 +1,8 @@
+== 0.2.2 2008-03-30
+
+* 1 bug fix:
+  * BPM is now actually carried over from FLAC to MP3 tags, not just thought to be.
+
 == 0.2.1 2008-03-30
 
 * 1 bug fix:
