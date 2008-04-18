@@ -1,6 +1,14 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe 'flac2mp3 command' do
+  def run_command(*args)
+    Object.const_set(:ARGV, args)
+    begin
+      eval File.read(File.join(File.dirname(__FILE__), *%w[.. bin flac2mp3]))
+    rescue SystemExit
+    end
+  end
+  
   before :all do
     path = File.join(File.dirname(__FILE__), *%w[.. bin])
     ENV['PATH'] = [path, ENV['PATH']].join(':')
@@ -11,21 +19,22 @@ describe 'flac2mp3 command' do
   end
   
   it 'should exist' do
-    pending 'figuring out how to test this command'
-    
-    system('flac2mp3 blah').should be_true
+    lambda { run_command('blah') }.should_not raise_error(Errno::ENOENT)
   end
   
   it 'should require a filename' do
-    pending 'figuring out how to test this command'
-      
-    `flac2mp3`.should match(/usage:.+filename/i)
+    self.expects(:puts) { |text|  text.match(/usage.+filename/i) }
+    run_command
   end
   
   it 'should pass the filename to Flac2mp3 for conversion' do
-    pending 'figuring out how to test this command'
-    
     Flac2mp3.expects(:convert).with('blah')
-    system('flac2mp3 blah')
+    run_command('blah')
+  end
+  
+  it 'should duplicate the filename' do
+    filename = 'blah'
+    filename.expects(:dup).returns(filename)
+    run_command(filename)
   end
 end
