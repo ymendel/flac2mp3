@@ -25,7 +25,7 @@ module Flac2mp3
         :album       => :album,
         :artist      => :artist,
         :bpm         => :TBPM,
-        :comment     => :comments,
+        :description => :comments,
         :composer    => :composer,
         :date        => :year,
         :genre       => :genre_s,

@@ -138,8 +138,8 @@ describe Flac2mp3, 'providing a mapping of tags' do
     Flac2mp3.tag_mapping[:bpm].should == :TBPM
   end
   
-  it "should map 'comment' to 'comments'" do
-    Flac2mp3.tag_mapping[:comment].should == :comments
+  it "should map 'description' to 'comments'" do
+    Flac2mp3.tag_mapping[:description].should == :comments
   end
   
   it "should map 'composer' to 'composer'" do
