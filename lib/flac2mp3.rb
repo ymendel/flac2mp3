@@ -39,7 +39,7 @@ module Flac2mp3
       data.tags.inject({}) do |hash, (key, value)|
         key = key.to_s.downcase.to_sym
         value = value.to_i if value.respond_to?(:match) and value.match(/^\d+$/)
-        value = value.to_s if key == :title
+        value = value.to_s if string_fields.include?(key)
         hash[key] = value
         hash
       end
@@ -55,6 +55,12 @@ module Flac2mp3
           tag.send("#{mp3tag}=", value)
         end
       end
+    end
+    
+    private
+    
+    def string_fields
+      [:title, :description]
     end
   end
 end

@@ -250,6 +250,20 @@ describe Flac2mp3, 'when getting FLAC tag data' do
     data = Flac2mp3.flacdata(@filename)
     data[:title].should == '45'
   end
+  
+  it 'should leave numeric descriptions as strings' do
+    @tags[:description] = '1938'  # This was my first run-in with this problem, from the Boilermakers' version of "Minor Swing" where for the description all I had was the year of the original
+    
+    data = Flac2mp3.flacdata(@filename)
+    data[:description].should == '1938'
+  end
+  
+  it 'should leave numeric titles as strings even if the title key is not a simple downcased symbol' do
+    @tags['DESCRIPTION'] = '1938'
+    
+    data = Flac2mp3.flacdata(@filename)
+    data[:description].should == '1938'
+  end
 end
 
 describe Flac2mp3, 'when setting MP3 tag data' do
