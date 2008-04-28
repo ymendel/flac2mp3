@@ -1,3 +1,8 @@
+== 0.2.4 2008-04-28
+
+* 1 bug fix:
+  * Numeric track descriptions were converted to integers, which caused setting the MP3 data (using ruby-mp3info) to raise an exception. They are now left as strings.
+
 == 0.2.3 2008-04-18
 
 * 1 bug fix:
