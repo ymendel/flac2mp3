@@ -166,6 +166,14 @@ describe Flac2mp3, 'providing a mapping of tags' do
     Flac2mp3.tag_mapping[:tracktotal].should == :TRCK
   end
   
+  it "should map 'discnumber' to 'TPOS'" do
+    Flac2mp3.tag_mapping[:discnumber].should == :TPOS
+  end
+  
+  it "should map 'disctotal' to 'TPOS'" do
+    Flac2mp3.tag_mapping[:disctotal].should == :TPOS
+  end
+  
   it "should map 'compilation' to 'TCMP'" do
     Flac2mp3.tag_mapping[:compilation].should == :TCMP
   end
@@ -375,6 +383,15 @@ describe Flac2mp3, 'when setting MP3 tag data' do
     @tags[:tracktotal]  = 15
     
     @mp3tags2.expects(:TRCK=).with('4/15')
+    
+    Flac2mp3.mp3data(@filename, @tags)
+  end
+  
+  it "should set tag2 'pos' to be a combination of discnumber and disctotal" do
+    @tags[:discnumber] = 1
+    @tags[:disctotal]  = 2
+    
+    @mp3tags2.expects(:TPOS=).with('1/2')
     
     Flac2mp3.mp3data(@filename, @tags)
   end

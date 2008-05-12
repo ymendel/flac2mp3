@@ -32,6 +32,8 @@ module Flac2mp3
         :title       => :title,
         :tracknumber => :TRCK,
         :tracktotal  => :TRCK,
+        :discnumber  => :TPOS,
+        :disctotal   => :TPOS,
         :compilation => :TCMP
       }
     end
@@ -65,12 +67,13 @@ module Flac2mp3
     end
     
     def tag2_fields
-      [:bpm, :composer, :compilation, :tracktotal, :tracknumber]
+      [:bpm, :composer, :compilation, :tracktotal, :tracknumber, :disctotal, :discnumber]
     end
     
     def tag_formats
       {
-        :TRCK => ':tracknumber/:tracktotal'
+        :TRCK => ':tracknumber/:tracktotal',
+        :TPOS => ':discnumber/:disctotal'
       }
     end
     
