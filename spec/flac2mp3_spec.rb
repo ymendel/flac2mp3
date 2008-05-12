@@ -161,6 +161,10 @@ describe Flac2mp3, 'providing a mapping of tags' do
   it "should map 'tracknumber' to 'tracknum'" do
     Flac2mp3.tag_mapping[:tracknumber].should == :tracknum
   end
+  
+  it "should map 'compilation' to 'TCMP'" do
+    Flac2mp3.tag_mapping[:compilation].should == :TCMP
+  end
 end
 
 describe Flac2mp3, 'when getting FLAC tag data' do
@@ -351,6 +355,14 @@ describe Flac2mp3, 'when setting MP3 tag data' do
     @tags[:composer] = 'Il Maestro'
     
     @mp3tags2.expects(:TCOM=).with(@tags[:composer])
+    
+    Flac2mp3.mp3data(@filename, @tags)
+  end
+  
+  it 'should use tag2 for compilation' do
+    @tags[:compilation] = '1'
+    
+    @mp3tags2.expects(:TCMP=).with(@tags[:compilation])
     
     Flac2mp3.mp3data(@filename, @tags)
   end

@@ -30,7 +30,8 @@ module Flac2mp3
         :date        => :year,
         :genre       => :genre_s,
         :title       => :title,
-        :tracknumber => :tracknum
+        :tracknumber => :tracknum,
+        :compilation => :TCMP
       }
     end
     
@@ -64,7 +65,7 @@ module Flac2mp3
     end
     
     def tag2_fields
-      [:bpm, :composer]
+      [:bpm, :composer, :compilation]
     end
   end
 end
