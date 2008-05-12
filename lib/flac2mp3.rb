@@ -30,7 +30,8 @@ module Flac2mp3
         :date        => :year,
         :genre       => :genre_s,
         :title       => :title,
-        :tracknumber => :tracknum,
+        :tracknumber => :TRCK,
+        :tracktotal  => :TRCK,
         :compilation => :TCMP
       }
     end
@@ -64,13 +65,28 @@ module Flac2mp3
     end
     
     def tag2_fields
-      [:bpm, :composer, :compilation]
+      [:bpm, :composer, :compilation, :tracktotal, :tracknumber]
+    end
+    
+    def tag_formats
+      {
+        :TRCK => ':tracknumber/:tracktotal'
+      }
     end
     
     def convert_tags(tags)
       mp3_tags = {}
+      
       tags.each do |key, value|
         next unless mp3tag = tag_mapping[key]
+        
+        if format = tag_formats[mp3tag]
+          value = format.gsub(/:(\w+)/) do 
+            field = $1
+            tags[field.to_sym]
+          end
+        end
+        
         target = tag2_fields.include?(key) ? :tag2 : :tag
         mp3_tags[mp3tag] = { :target => target, :value => value }
       end

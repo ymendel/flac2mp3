@@ -158,8 +158,12 @@ describe Flac2mp3, 'providing a mapping of tags' do
     Flac2mp3.tag_mapping[:title].should == :title
   end
   
-  it "should map 'tracknumber' to 'tracknum'" do
-    Flac2mp3.tag_mapping[:tracknumber].should == :tracknum
+  it "should map 'tracknumber' to 'TRCK'" do
+    Flac2mp3.tag_mapping[:tracknumber].should == :TRCK
+  end
+  
+  it "should map 'tracktotal' to 'TRCK'" do
+    Flac2mp3.tag_mapping[:tracktotal].should == :TRCK
   end
   
   it "should map 'compilation' to 'TCMP'" do
@@ -328,7 +332,6 @@ describe Flac2mp3, 'when setting MP3 tag data' do
     
     @mp3tags.expects(:comments=).never
     @mp3tags.expects(:year=).never
-    @mp3tags.expects(:tracknum=).never
     
     Flac2mp3.mp3data(@filename, @tags)
   end
@@ -363,6 +366,15 @@ describe Flac2mp3, 'when setting MP3 tag data' do
     @tags[:compilation] = '1'
     
     @mp3tags2.expects(:TCMP=).with(@tags[:compilation])
+    
+    Flac2mp3.mp3data(@filename, @tags)
+  end
+  
+  it 'should set tag2 track to be a combination of tracknumber and tracktotal' do
+    @tags[:tracknumber] = 4
+    @tags[:tracktotal]  = 15
+    
+    @mp3tags2.expects(:TRCK=).with('4/15')
     
     Flac2mp3.mp3data(@filename, @tags)
   end
