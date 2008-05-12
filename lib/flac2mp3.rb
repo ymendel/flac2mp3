@@ -49,14 +49,13 @@ module Flac2mp3
     def mp3data(filename, tags)
       raise TypeError, "Tags must be a hash" unless tags.is_a?(Hash)
       Mp3Info.open(filename) do |mp3|
-        tags.each do |key, value|
-          next unless mp3tag = tag_mapping[key]
-          tag = mp3.tag
-          tag = mp3.tag2 if tag2_fields.include?(key)
-          tag.send("#{mp3tag}=", value)
+        convert_tags(tags).each do |mp3tag, data|
+          tag = mp3.send(data[:target])
+          tag.send("#{mp3tag}=", data[:value])
         end
       end
     end
+    
     
     private
     
@@ -66,6 +65,16 @@ module Flac2mp3
     
     def tag2_fields
       [:bpm, :composer, :compilation]
+    end
+    
+    def convert_tags(tags)
+      mp3_tags = {}
+      tags.each do |key, value|
+        next unless mp3tag = tag_mapping[key]
+        target = tag2_fields.include?(key) ? :tag2 : :tag
+        mp3_tags[mp3tag] = { :target => target, :value => value }
+      end
+      mp3_tags
     end
   end
 end
