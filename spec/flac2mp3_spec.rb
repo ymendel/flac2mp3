@@ -142,8 +142,8 @@ describe Flac2mp3, 'providing a mapping of tags' do
     Flac2mp3.tag_mapping[:description].should == :comments
   end
   
-  it "should map 'composer' to 'composer'" do
-    Flac2mp3.tag_mapping[:composer].should == :composer
+  it "should map 'composer' to 'TCOM'" do
+    Flac2mp3.tag_mapping[:composer].should == :TCOM
   end
   
   it "should map 'date' to 'year'" do
@@ -258,7 +258,7 @@ describe Flac2mp3, 'when getting FLAC tag data' do
     data[:description].should == '1938'
   end
   
-  it 'should leave numeric titles as strings even if the title key is not a simple downcased symbol' do
+  it 'should leave numeric descriptions as strings even if the description key is not a simple downcased symbol' do
     @tags['DESCRIPTION'] = '1938'
     
     data = Flac2mp3.flacdata(@filename)
@@ -343,6 +343,14 @@ describe Flac2mp3, 'when setting MP3 tag data' do
     @tags[:bpm] = '5'
     
     @mp3tags2.expects(:TBPM=).with(@tags[:bpm])
+    
+    Flac2mp3.mp3data(@filename, @tags)
+  end
+  
+  it 'should use tag2 for composer' do
+    @tags[:composer] = 'Il Maestro'
+    
+    @mp3tags2.expects(:TCOM=).with(@tags[:composer])
     
     Flac2mp3.mp3data(@filename, @tags)
   end

@@ -26,7 +26,7 @@ module Flac2mp3
         :artist      => :artist,
         :bpm         => :TBPM,
         :description => :comments,
-        :composer    => :composer,
+        :composer    => :TCOM,
         :date        => :year,
         :genre       => :genre_s,
         :title       => :title,
@@ -51,7 +51,7 @@ module Flac2mp3
         tags.each do |key, value|
           next unless mp3tag = tag_mapping[key]
           tag = mp3.tag
-          tag = mp3.tag2 if key == :bpm
+          tag = mp3.tag2 if tag2_fields.include?(key)
           tag.send("#{mp3tag}=", value)
         end
       end
@@ -61,6 +61,10 @@ module Flac2mp3
     
     def string_fields
       [:title, :description]
+    end
+    
+    def tag2_fields
+      [:bpm, :composer]
     end
   end
 end
