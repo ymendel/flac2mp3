@@ -11,6 +11,7 @@ end
 
 require 'optparse'
 require 'flac2mp3'
+require 'flac2mp3/version'
 
 # NOTE: the option -p/--path= is given as an example, and should probably be replaced in your application.
 
