@@ -5,7 +5,7 @@ require 'mp3info'
 
 module Flac2mp3
   class << self
-    def convert(filename)
+    def convert(filename, delete_flac = false)
       raise TypeError, "'#{filename}' is not a file" unless FileTest.file?(filename)
       filename.extend(Flac2mp3::StringExtensions)
       out_filename = output_filename(filename)
@@ -14,6 +14,8 @@ module Flac2mp3
       system "flac -c -d #{filename.safequote} | lame --preset standard - #{out_filename.safequote}"
       
       mp3data(out_filename, flacdata(filename))
+      
+      File.delete(filename) if delete_flac
     end
     
     def output_filename(filename)
