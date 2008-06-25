@@ -1,7 +1,12 @@
+== 0.2.6 2008-06-25
+
+* 1 enhancement:
+  * Can now optionally delete the original FLAC file after conversion.
+
 == 0.2.5 2008-05-12
 
 * 1 bug fix:
-  * Composer now actually carried over from FLAC to MP# tags, not just thought to be.
+  * Composer now actually carried over from FLAC to MP3 tags, not just thought to be.
   
 * 3 enhancements:
   * Compilation flag carried over.
