@@ -16,6 +16,10 @@ describe 'flac2mp3 command' do
   
   before :each do
     Flac2mp3.stubs(:convert)
+    
+    [:ARGV, :OPTIONS, :MANDATORY_OPTIONS].each do |const|
+      Object.send(:remove_const, const) if Object.const_defined?(const)
+    end
   end
   
   it 'should exist' do
