@@ -43,22 +43,22 @@ describe 'flac2mp3 command' do
   end
   
   it 'should pass on a true flac-deletion option if specified on the command line (using --delete)' do
-    Flac2mp3.expects(:convert).with(anything, true)
+    Flac2mp3.expects(:convert).with(anything, :delete => true)
     run_command('blah', '--delete')
   end
   
   it 'should pass on a false flac-deletion option if specified on the command line (using --no-delete)' do
-    Flac2mp3.expects(:convert).with(anything, false)
+    Flac2mp3.expects(:convert).with(anything, :delete => false)
     run_command('blah', '--no-delete')
   end
   
   it 'should pass on a true flac-deletion option if specified on the command line (using -d)' do
-    Flac2mp3.expects(:convert).with(anything, true)
+    Flac2mp3.expects(:convert).with(anything, :delete => true)
     run_command('blah', '-d')
   end
   
   it 'should pass on a false flac-deletion option if nothing specified on the command line' do
-    Flac2mp3.expects(:convert).with(anything, false)
+    Flac2mp3.expects(:convert).with(anything, :delete => false)
     run_command('blah')
   end
 end
