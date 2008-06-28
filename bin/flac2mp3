@@ -15,7 +15,7 @@ require 'flac2mp3/version'
 
 # NOTE: the option -p/--path= is given as an example, and should probably be replaced in your application.
 
-OPTIONS = { :delete => false }
+OPTIONS = { :delete => false, :silent => false }
 MANDATORY_OPTIONS = %w[]
 
 parser = OptionParser.new do |opts|
@@ -29,7 +29,8 @@ BANNER
           "Show the #{File.basename($0)} version number and exit") { puts "flac2mp3 #{Flac2mp3::VERSION::STRING}"; exit }
   opts.on('-d', '--[no-]delete',
           "Delete the original file after conversion") { |delete|  OPTIONS[:delete] = delete }
-
+  opts.on('-s', '--silent',
+          "Don't show progress") { |silent|  OPTIONS[:silent] = silent }
   opts.on('-h', '--help',
           'Show this help message.') { puts opts; exit }
   opts.parse!(ARGV)
@@ -47,4 +48,4 @@ unless filename
   exit
 end
 
-Flac2mp3.convert(filename.dup, :delete => OPTIONS[:delete])
+Flac2mp3.convert(filename.dup, OPTIONS)
