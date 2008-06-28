@@ -49,7 +49,6 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
   before :each do
     @filename = 'blah.flac'
     FileTest.stubs(:file?).with(@filename).returns(true)
-    File.stubs(:delete)
     @output_filename = 'blah.mp3'
     Flac2mp3.stubs(:output_filename).with(@filename).returns(@output_filename)
     Flac2mp3.stubs(:system)
@@ -94,17 +93,17 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
   end
   
   it 'should accept an option to delete the flac' do
-    lambda { Flac2mp3.convert('blah.flac', true) }.should_not raise_error(ArgumentError)
+    lambda { Flac2mp3.convert('blah.flac', :delete => true) }.should_not raise_error(ArgumentError)
   end
   
   it 'should delete the original file if given a true value for the option' do
     File.expects(:delete).with(@filename)
-    Flac2mp3.convert(@filename, true)
+    Flac2mp3.convert(@filename, :delete => true)
   end
   
   it 'should not delete the original file if given a false value for the option' do
     File.expects(:delete).never
-    Flac2mp3.convert(@filename, false)
+    Flac2mp3.convert(@filename, :delete => false)
   end
   
   it 'should not delete the original file by default' do
