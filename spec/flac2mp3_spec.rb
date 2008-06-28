@@ -53,6 +53,9 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
     Flac2mp3.stubs(:output_filename).with(@filename).returns(@output_filename)
     Flac2mp3.stubs(:system)
     
+    @filename.stubs(:safequote).returns('-blah-flac-')
+    @output_filename.stubs(:safequote).returns('-blah-mp3-')
+    
     @flacdata = {}
     Flac2mp3.stubs(:flacdata).with(@filename).returns(@flacdata)
     Flac2mp3.stubs(:mp3data)
@@ -64,7 +67,6 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
   
   it 'should extend the filename with the string extensions' do
     @filename.expects(:extend).with(Flac2mp3::StringExtensions).returns(@filename)
-    @filename.stubs(:safequote)
     Flac2mp3.convert(@filename)
   end
   
@@ -75,15 +77,11 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
   
   it 'should extend the output filename with the string extensions' do
     @output_filename.expects(:extend).with(Flac2mp3::StringExtensions).returns(@output_filename)
-    @output_filename.stubs(:safequote)
     Flac2mp3.convert(@filename)
   end
   
   it 'should use system commands to convert the FLAC to an MP3' do
-    @filename.stubs(:safequote).returns('-blah-flac-')
-    @output_filename.stubs(:safequote).returns('-blah-mp3-')
     Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
-    
     Flac2mp3.convert(@filename)
   end
   
@@ -116,26 +114,17 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
   end
   
   it 'should tell the system commands to be silent if given a true value for the option' do
-    @filename.stubs(:safequote).returns('-blah-flac-')
-    @output_filename.stubs(:safequote).returns('-blah-mp3-')
     Flac2mp3.expects(:system).with("flac --silent --stdout --decode #{@filename.safequote} | lame --silent --preset standard - #{@output_filename.safequote}")
-    
     Flac2mp3.convert(@filename, :silent => true)
   end
   
   it 'should not tell the system commands to be silent if given a true value for the option' do
-    @filename.stubs(:safequote).returns('-blah-flac-')
-    @output_filename.stubs(:safequote).returns('-blah-mp3-')
     Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
-    
     Flac2mp3.convert(@filename, :silent => false)
   end
   
   it 'should not tell the system commands to be silent by default' do
-    @filename.stubs(:safequote).returns('-blah-flac-')
-    @output_filename.stubs(:safequote).returns('-blah-mp3-')
     Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
-    
     Flac2mp3.convert(@filename)
   end
 end
