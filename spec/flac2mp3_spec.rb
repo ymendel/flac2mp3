@@ -110,6 +110,34 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
     File.expects(:delete).never
     Flac2mp3.convert(@filename)
   end
+  
+  it 'should accept an option to run silently' do
+    lambda { Flac2mp3.convert('blah.flac', :silent => true) }.should_not raise_error(ArgumentError)
+  end
+  
+  it 'should tell the system commands to be silent if given a true value for the option' do
+    @filename.stubs(:safequote).returns('-blah-flac-')
+    @output_filename.stubs(:safequote).returns('-blah-mp3-')
+    Flac2mp3.expects(:system).with("flac --silent --stdout --decode #{@filename.safequote} | lame --silent --preset standard - #{@output_filename.safequote}")
+    
+    Flac2mp3.convert(@filename, :silent => true)
+  end
+  
+  it 'should not tell the system commands to be silent if given a true value for the option' do
+    @filename.stubs(:safequote).returns('-blah-flac-')
+    @output_filename.stubs(:safequote).returns('-blah-mp3-')
+    Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
+    
+    Flac2mp3.convert(@filename, :silent => false)
+  end
+  
+  it 'should not tell the system commands to be silent by default' do
+    @filename.stubs(:safequote).returns('-blah-flac-')
+    @output_filename.stubs(:safequote).returns('-blah-mp3-')
+    Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
+    
+    Flac2mp3.convert(@filename)
+  end
 end
 
 describe Flac2mp3, 'when converting and given a filename not belonging to a regular file' do

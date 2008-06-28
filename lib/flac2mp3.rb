@@ -11,7 +11,10 @@ module Flac2mp3
       out_filename = output_filename(filename)
       out_filename.extend(Flac2mp3::StringExtensions)
       
-      system "flac --stdout --decode #{filename.safequote} | lame --preset standard - #{out_filename.safequote}"
+      commands = { :flac => 'flac', :mp3 => 'lame' }
+      commands.each { |k, v|  v << ' --silent' } if options[:silent]
+      
+      system "#{commands[:flac]} --stdout --decode #{filename.safequote} | #{commands[:mp3]} --preset standard - #{out_filename.safequote}"
       
       mp3data(out_filename, flacdata(filename))
       
