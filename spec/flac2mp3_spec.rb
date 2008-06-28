@@ -82,7 +82,7 @@ describe Flac2mp3, 'when converting and given a filename belonging to a regular 
   it 'should use system commands to convert the FLAC to an MP3' do
     @filename.stubs(:safequote).returns('-blah-flac-')
     @output_filename.stubs(:safequote).returns('-blah-mp3-')
-    Flac2mp3.expects(:system).with("flac -c -d #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
+    Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
     
     Flac2mp3.convert(@filename)
   end

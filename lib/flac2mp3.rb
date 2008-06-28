@@ -11,7 +11,7 @@ module Flac2mp3
       out_filename = output_filename(filename)
       out_filename.extend(Flac2mp3::StringExtensions)
       
-      system "flac -c -d #{filename.safequote} | lame --preset standard - #{out_filename.safequote}"
+      system "flac --stdout --decode #{filename.safequote} | lame --preset standard - #{out_filename.safequote}"
       
       mp3data(out_filename, flacdata(filename))
       
