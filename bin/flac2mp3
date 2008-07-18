@@ -31,6 +31,8 @@ BANNER
           "Delete the original file after conversion") { |delete|  OPTIONS[:delete] = delete }
   opts.on('-s', '--silent',
           "Don't show progress") { |silent|  OPTIONS[:silent] = silent }
+  opts.on('-e', '--encoding=ENCODING', String,
+          "Set lame encoding options", "Default: --preset standard") { |encoding|  OPTIONS[:encoding] = encoding }
   opts.on('-h', '--help',
           'Show this help message.') { puts opts; exit }
   opts.parse!(ARGV)

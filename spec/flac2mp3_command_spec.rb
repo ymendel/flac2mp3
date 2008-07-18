@@ -76,4 +76,19 @@ describe 'flac2mp3 command' do
     Flac2mp3.expects(:convert).with(anything, has_entry(:silent => false))
     run_command('blah')
   end
+  
+  it 'should pass on the encoding option specified on the command line' do
+    Flac2mp3.expects(:convert).with(anything, has_entry(:encoding => '--preset fast standard'))
+    run_command('blah', '--encoding', '--preset fast standard')
+  end
+  
+  it 'should pass on the encoding option specified in shorthand on the command line' do
+    Flac2mp3.expects(:convert).with(anything, has_entry(:encoding => '--preset fast standard'))
+    run_command('blah', '-e', '--preset fast standard')
+  end
+  
+  it 'should pass on no encoding option if none specified on the command line' do
+    Flac2mp3.expects(:convert).with(anything, Not(has_key(:encoding)))
+    run_command('blah')
+  end
 end
