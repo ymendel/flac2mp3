@@ -13,8 +13,10 @@ module Flac2mp3
       
       commands = { :flac => 'flac', :mp3 => 'lame' }
       commands.each { |k, v|  v << ' --silent' } if options[:silent]
+      encoding = options[:encoding]
+      encoding = default_encoding if encoding.to_s.strip.empty?
       
-      system "#{commands[:flac]} --stdout --decode #{filename.safequote} | #{commands[:mp3]} --preset standard - #{out_filename.safequote}"
+      system "#{commands[:flac]} --stdout --decode #{filename.safequote} | #{commands[:mp3]} #{encoding} - #{out_filename.safequote}"
       
       mp3data(out_filename, flacdata(filename))
       
@@ -99,6 +101,13 @@ module Flac2mp3
         mp3_tags[mp3tag] = { :target => target, :value => value }
       end
       mp3_tags
+    end
+    
+    
+    private
+    
+    def default_encoding
+      '--preset standard'
     end
   end
 end
