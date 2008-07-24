@@ -39,6 +39,10 @@ class Flac2mp3
     !!options[:delete]
   end
   
+  def silent?
+    !!options[:silent]
+  end
+  
   def output_filename(filename)
     filename.chomp('.flac') + '.mp3'
   end

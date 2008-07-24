@@ -39,6 +39,18 @@ describe Flac2mp3 do
     it 'should indicate the original file should not be deleted when no option is given' do
       Flac2mp3.new.delete?.should be(false)
     end
+    
+    it 'should indicate the conversion should be silent when a true option is given' do
+      Flac2mp3.new(:silent => true).silent?.should be(true)
+    end
+    
+    it 'should indicate the conversion should not be silent when a false option is given' do
+      Flac2mp3.new(:silent => false).silent?.should be(false)
+    end
+    
+    it 'should indicate the conversion should not be silent when no option is given' do
+      Flac2mp3.new.silent?.should be(false)
+    end
   end
   
   it 'should convert' do
