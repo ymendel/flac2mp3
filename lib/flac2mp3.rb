@@ -10,8 +10,14 @@ class Flac2mp3
   
   def convert(filename)
     raise TypeError, "'#{filename}' is not a file" unless FileTest.file?(filename)
-    process_conversion(filename, output_filename(filename))
+    process_conversion(filename)
     File.delete(filename) if delete?
+  end
+  
+  def process_conversion(filename)
+    outfile = output_filename(filename)
+    convert_data(filename, outfile)
+    convert_metadata(filename, outfile)
   end
   
   def options

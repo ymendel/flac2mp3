@@ -48,7 +48,6 @@ describe Flac2mp3 do
   describe 'when converting' do
     before :each do
       @filename = 'test.flac'
-      
       @flac2mp3.stubs(:process_conversion)
     end
     
@@ -73,14 +72,9 @@ describe Flac2mp3 do
       it 'should not error' do
         lambda { @flac2mp3.convert(@filename) }.should_not raise_error(TypeError)
       end
-      
-      it 'get the output filename from the given filename' do
-        @flac2mp3.expects(:output_filename).with(@filename)
-        @flac2mp3.convert(@filename)
-      end
-      
+            
       it 'should process the conversion' do
-        @flac2mp3.expects(:process_conversion).with(@filename, @flac2mp3.output_filename(@filename))
+        @flac2mp3.expects(:process_conversion).with(@filename)
         @flac2mp3.convert(@filename)
       end
       
@@ -120,6 +114,43 @@ describe Flac2mp3 do
       it 'should error' do
         lambda { @flac2mp3.convert(@filename) }.should raise_error(TypeError)
       end
+    end
+  end
+  
+  it 'should process conversion' do
+    @flac2mp3.should respond_to(:process_conversion)
+  end
+  
+  describe 'when processing conversion' do
+    before :each do
+      @filename     = 'test.flac'
+      @out_filename = 'test.mp3'
+      @flac2mp3.stubs(:output_filename).returns(@out_filename)
+      @flac2mp3.stubs(:convert_data)
+      @flac2mp3.stubs(:convert_metadata)
+    end
+    
+    it 'should accept a filename' do
+      lambda { @flac2mp3.process_conversion(@filename) }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should require a filename' do
+      lambda { @flac2mp3.process_conversion }.should raise_error(ArgumentError)
+    end
+    
+    it 'get the output filename from the given filename' do
+      @flac2mp3.expects(:output_filename).with(@filename)
+      @flac2mp3.process_conversion(@filename)
+    end
+    
+    it 'should convert data' do
+      @flac2mp3.expects(:convert_data).with(@filename, @out_filename)
+      @flac2mp3.process_conversion(@filename)
+    end
+    
+    it 'should convert metadata' do
+      @flac2mp3.expects(:convert_metadata).with(@filename, @out_filename)
+      @flac2mp3.process_conversion(@filename)
     end
   end
   
