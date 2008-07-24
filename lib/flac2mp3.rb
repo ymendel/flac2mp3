@@ -8,8 +8,22 @@ class Flac2mp3
     @options = options
   end
   
+  def convert(filename)
+    raise TypeError, "'#{filename}' is not a file" unless FileTest.file?(filename)
+    process_conversion(filename, output_filename(filename))
+    File.delete(filename) if delete?
+  end
+  
   def options
     @options.dup
+  end
+  
+  def delete?
+    !!options[:delete]
+  end
+  
+  def output_filename(filename)
+    filename.chomp('.flac') + '.mp3'
   end
   
   class << self

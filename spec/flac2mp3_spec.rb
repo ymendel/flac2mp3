@@ -1,6 +1,10 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe Flac2mp3 do
+  before :each do
+    @flac2mp3 = Flac2mp3.new
+  end
+  
   describe 'when initialized' do
     before :each do
       @options = { :silent => true, :delete => false }
@@ -22,6 +26,122 @@ describe Flac2mp3 do
       flac2mp3 = Flac2mp3.new(@options.dup)
       flac2mp3.options[:some_key] = 'some value'
       flac2mp3.options.should == @options
+    end
+    
+    it 'should indicate the original file should be deleted when a true option is given' do
+      Flac2mp3.new(:delete => true).delete?.should be(true)
+    end
+    
+    it 'should indicate the original file should not be deleted when a false option is given' do
+      Flac2mp3.new(:delete => false).delete?.should be(false)
+    end
+    
+    it 'should indicate the original file should not be deleted when no option is given' do
+      Flac2mp3.new.delete?.should be(false)
+    end
+  end
+  
+  it 'should convert' do
+    @flac2mp3.should respond_to(:convert)
+  end
+  
+  describe 'when converting' do
+    before :each do
+      @filename = 'test.flac'
+      
+      @flac2mp3.stubs(:process_conversion)
+    end
+    
+    it 'should accept a filename' do
+      lambda { @flac2mp3.convert(@filename) }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should require a filename' do
+      lambda { @flac2mp3.convert }.should raise_error(ArgumentError)
+    end
+    
+    it 'should check if the filename belongs to a regular file' do
+      FileTest.expects(:file?).with(@filename).returns(true)
+      @flac2mp3.convert(@filename)
+    end
+    
+    describe 'when given a filename belonging to a regular file' do
+      before :each do
+        FileTest.stubs(:file?).returns(true)
+      end
+      
+      it 'should not error' do
+        lambda { @flac2mp3.convert(@filename) }.should_not raise_error(TypeError)
+      end
+      
+      it 'get the output filename from the given filename' do
+        @flac2mp3.expects(:output_filename).with(@filename)
+        @flac2mp3.convert(@filename)
+      end
+      
+      it 'should process the conversion' do
+        @flac2mp3.expects(:process_conversion).with(@filename, @flac2mp3.output_filename(@filename))
+        @flac2mp3.convert(@filename)
+      end
+      
+      it 'should check if the original file should be deleted' do
+        @flac2mp3.expects(:delete?)
+        @flac2mp3.convert(@filename)
+      end
+      
+      describe 'when the original file should be deleted' do
+        before :each do
+          @flac2mp3.stubs(:delete?).returns(true)
+        end
+        
+        it 'should delete the original file' do
+          File.expects(:delete).with(@filename)
+          @flac2mp3.convert(@filename)
+        end
+      end
+      
+      describe 'when the original file should not be deleted' do
+        before :each do
+          @flac2mp3.stubs(:delete?).returns(false)
+        end
+        
+        it 'should not delete the original file' do
+          File.expects(:delete).never
+          @flac2mp3.convert(@filename)
+        end
+      end
+    end
+    
+    describe 'when given a filename not belonging to a regular file' do
+      before :each do
+        FileTest.stubs(:file?).returns(false)
+      end
+      
+      it 'should error' do
+        lambda { @flac2mp3.convert(@filename) }.should raise_error(TypeError)
+      end
+    end
+  end
+  
+  it 'should provide an output filename' do
+    @flac2mp3.should respond_to(:output_filename)
+  end
+  
+  describe 'providing an output filename' do
+    it 'should accept a filename' do
+      lambda { @flac2mp3.output_filename('blah.flac') }.should_not raise_error(ArgumentError)
+    end
+
+    it 'should require a filename' do
+      lambda { @flac2mp3.output_filename }.should raise_error(ArgumentError)
+    end
+
+    it 'should convert a .flac extension to an .mp3 extension' do
+      @flac2mp3.output_filename('blah.flac').should == 'blah.mp3'
+    end
+
+    it 'should append an .mp3 extension if no .flac extension exists' do
+      @flac2mp3.output_filename('blah').should == 'blah.mp3'
     end
   end
 end
