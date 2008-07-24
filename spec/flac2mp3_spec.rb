@@ -281,6 +281,28 @@ describe Flac2mp3 do
       end
     end
   end
+
+  it 'should quote filenames safely' do
+    @flac2mp3.should respond_to(:safequote)
+  end
+  
+  describe 'when quoting a filename safely' do
+    it 'should accept a filename' do
+      lambda { @flac2mp3.safequote('test.flac') }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should require a filename' do
+      lambda { @flac2mp3.safequote }.should raise_error(ArgumentError)
+    end
+    
+    it 'should leave alphanumeric characters alone' do
+      @flac2mp3.safequote('abc_123').should == 'abc_123'
+    end
+
+    it 'should escape non-alphanumeric characters' do
+      @flac2mp3.safequote(%q[a-b"c 12'3]).should == %q[a\-b\"c\ 12\'3]
+    end
+  end
 end
 
 describe Flac2mp3 do

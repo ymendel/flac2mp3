@@ -47,6 +47,10 @@ class Flac2mp3
     filename.chomp('.flac') + '.mp3'
   end
   
+  def safequote(filename)
+    filename.gsub(/(\W)/, '\\\\\1')
+  end
+  
   class << self
     def convert(filename, options = {})
       raise TypeError, "'#{filename}' is not a file" unless FileTest.file?(filename)
