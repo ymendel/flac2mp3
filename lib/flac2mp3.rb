@@ -3,7 +3,7 @@ require 'flac2mp3/string_extensions'
 require 'flacinfo'
 require 'mp3info'
 
-module Flac2mp3
+class Flac2mp3
   class << self
     def convert(filename, options = {})
       raise TypeError, "'#{filename}' is not a file" unless FileTest.file?(filename)

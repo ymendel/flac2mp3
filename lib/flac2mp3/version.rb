@@ -1,4 +1,4 @@
-module Flac2mp3 #:nodoc:
+class Flac2mp3 #:nodoc:
   module VERSION #:nodoc:
     MAJOR = 0
     MINOR = 2
