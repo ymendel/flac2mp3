@@ -20,6 +20,10 @@ class Flac2mp3
     convert_metadata(filename, outfile)
   end
   
+  def convert_data(filename, outfile)
+    system "#{flac_command(filename)} | #{mp3_command(outfile)}"
+  end
+  
   def options
     @options.dup
   end

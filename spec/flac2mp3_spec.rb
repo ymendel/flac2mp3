@@ -175,6 +175,49 @@ describe Flac2mp3 do
       @flac2mp3.output_filename('blah').should == 'blah.mp3'
     end
   end
+  
+  it 'should convert data' do
+    @flac2mp3.should respond_to(:convert_data)
+  end
+  
+  describe 'when converting data' do
+    before :each do
+      @filename     = 'test.flac'
+      @out_filename = 'test.mp3'
+      @flac_command = 'flac command'
+      @mp3_command  = 'mp3 command'
+      @flac2mp3.stubs(:flac_command).returns(@flac_command)
+      @flac2mp3.stubs(:mp3_command).returns(@mp3_command)
+      @flac2mp3.stubs(:system)
+    end
+    
+    it 'should accept a filename and an output filename' do
+      lambda { @flac2mp3.convert_data(@filename, @out_filename) }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should require an output filename' do
+      lambda { @flac2mp3.convert_data(@filename) }.should raise_error(ArgumentError)
+    end
+    
+    it 'should require a filename' do
+      lambda { @flac2mp3.convert_data }.should raise_error(ArgumentError)
+    end
+    
+    it 'should call the flac command with the given filename' do
+      @flac2mp3.expects(:flac_command).with(@filename)
+      @flac2mp3.convert_data(@filename, @out_filename)
+    end
+    
+    it 'should call the mp3 command with the given output filename' do
+      @flac2mp3.expects(:mp3_command).with(@out_filename)
+      @flac2mp3.convert_data(@filename, @out_filename)
+    end
+    
+    it 'should shell out to the system with the flac and mp3 commands' do
+      @flac2mp3.expects(:system).with("#{@flac_command} | #{@mp3_command}")
+      @flac2mp3.convert_data(@filename, @out_filename)
+    end
+  end
 end
 
 describe Flac2mp3 do
