@@ -24,6 +24,13 @@ class Flac2mp3
     system "#{flac_command(filename)} | #{mp3_command(outfile)}"
   end
   
+  def flac_command(filename)
+    command = 'flac'
+    command << ' --silent' if silent?
+    
+    "#{command} --stdout --decode #{safequote(filename)}"
+  end
+  
   def options
     @options.dup
   end

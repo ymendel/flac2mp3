@@ -218,6 +218,57 @@ describe Flac2mp3 do
       @flac2mp3.convert_data(@filename, @out_filename)
     end
   end
+  
+  it 'should provide a flac command' do
+    @flac2mp3.should respond_to(:flac_command)
+  end
+  
+  describe 'when providing a flac command' do
+    before :each do
+      @filename = 'test.flac'
+      @safe_filename = 'safetest.safeflac'
+      @flac2mp3.stubs(:safequote).returns(@safe_filename)
+      @flac2mp3.stubs(:silent?)
+    end
+    
+    it 'should accept a filename' do
+      lambda { @flac2mp3.flac_command(@filename) }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should require a filename' do
+      lambda { @flac2mp3.flac_command }.should raise_error(ArgumentError)
+    end
+    
+    it 'should safequote the filename' do
+      @flac2mp3.expects(:safequote).with(@filename)
+      @flac2mp3.flac_command(@filename)
+    end
+    
+    it 'should check if the command should be silent' do
+      @flac2mp3.expects(:silent?)
+      @flac2mp3.flac_command(@filename)
+    end
+    
+    describe 'when the command should be silent' do
+      before :each do
+        @flac2mp3.stubs(:silent?).returns(true)
+      end
+      
+      it 'should provide a flac shell command that will be silent' do
+        @flac2mp3.flac_command(@filename).should == "flac --silent --stdout --decode #{@safe_filename}"
+      end
+    end
+    
+    describe 'when the command should not be silent' do
+      before :each do
+        @flac2mp3.stubs(:silent?).returns(false)
+      end
+      
+      it 'should provide a flac shell command that will not be silent' do
+        @flac2mp3.flac_command(@filename).should == "flac --stdout --decode #{@safe_filename}"
+      end
+    end
+  end
 end
 
 describe Flac2mp3 do
