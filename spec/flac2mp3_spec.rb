@@ -1,6 +1,32 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe Flac2mp3 do
+  describe 'when initialized' do
+    before :each do
+      @options = { :silent => true, :delete => false }
+    end
+    
+    it 'should accept options' do
+      lambda { Flac2mp3.new(@options) }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should not require options' do
+      lambda { Flac2mp3.new }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should store the options' do
+      Flac2mp3.new(@options).options.should == @options
+    end
+    
+    it 'should not allow changes to the options' do
+      flac2mp3 = Flac2mp3.new(@options.dup)
+      flac2mp3.options[:some_key] = 'some value'
+      flac2mp3.options.should == @options
+    end
+  end
+end
+
+describe Flac2mp3 do
   it 'should convert' do
     Flac2mp3.should respond_to(:convert)
   end

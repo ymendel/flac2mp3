@@ -4,6 +4,14 @@ require 'flacinfo'
 require 'mp3info'
 
 class Flac2mp3
+  def initialize(options = {})
+    @options = options
+  end
+  
+  def options
+    @options.dup
+  end
+  
   class << self
     def convert(filename, options = {})
       raise TypeError, "'#{filename}' is not a file" unless FileTest.file?(filename)
