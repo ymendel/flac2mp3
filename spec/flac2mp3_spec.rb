@@ -51,6 +51,15 @@ describe Flac2mp3 do
     it 'should indicate the conversion should not be silent when no option is given' do
       Flac2mp3.new.silent?.should be(false)
     end
+    
+    it 'should store the given encoding' do
+      encoding = '-VAWESOME'
+      Flac2mp3.new(:encoding => encoding).encoding.should == encoding
+    end
+    
+    it 'should default the encoding to --preset standard' do
+      Flac2mp3.new.encoding.should == '--preset standard'
+    end
   end
   
   it 'should convert' do

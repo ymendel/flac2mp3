@@ -50,6 +50,10 @@ class Flac2mp3
     !!options[:silent]
   end
   
+  def encoding
+    options[:encoding] || self.class.default_encoding
+  end
+  
   def output_filename(filename)
     filename.chomp('.flac') + '.mp3'
   end
@@ -158,7 +162,7 @@ class Flac2mp3
     end
     
     
-    private
+    public
     
     def default_encoding
       '--preset standard'
