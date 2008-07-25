@@ -38,6 +38,10 @@ class Flac2mp3
     "#{command} #{encoding} - #{safequote(filename)}"
   end
   
+  def convert_metadata(filename, outfile)
+    set_mp3data(outfile, get_flacdata(filename))
+  end
+  
   def options
     @options.dup
   end

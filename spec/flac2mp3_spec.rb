@@ -370,6 +370,42 @@ describe Flac2mp3 do
       @flac2mp3.safequote(%q[a-b"c 12'3]).should == %q[a\-b\"c\ 12\'3]
     end
   end
+  
+  it 'should convert metadata' do
+    @flac2mp3.should respond_to(:convert_metadata)
+  end
+  
+  describe 'when converting metadata' do
+    before :each do
+      @filename     = 'test.flac'
+      @out_filename = 'test.mp3'
+      @flacdata = stub('flacdata')
+      @flac2mp3.stubs(:get_flacdata).returns(@flacdata)
+      @flac2mp3.stubs(:set_mp3data)
+    end
+    
+    it 'should accept a filename and an output filename' do
+      lambda { @flac2mp3.convert_metadata(@filename, @out_filename) }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should require an output filename' do
+      lambda { @flac2mp3.convert_metadata(@filename) }.should raise_error(ArgumentError)
+    end
+    
+    it 'should require a filename' do
+      lambda { @flac2mp3.convert_metadata }.should raise_error(ArgumentError)
+    end
+    
+    it 'should get the flac metadata' do
+      @flac2mp3.expects(:get_flacdata).with(@filename)
+      @flac2mp3.convert_metadata(@filename, @out_filename)
+    end
+    
+    it 'should set the mp3 metadata with the flac metadata' do
+      @flac2mp3.expects(:set_mp3data).with(@out_filename, @flacdata)
+      @flac2mp3.convert_metadata(@filename, @out_filename)
+    end
+  end
 end
 
 describe Flac2mp3 do
