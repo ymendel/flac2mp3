@@ -92,10 +92,6 @@ class Flac2mp3
       new(options).convert(filename)
     end
     
-    def output_filename(filename)
-      filename.chomp('.flac') + '.mp3'
-    end
-    
     def tag_mapping
       {
         :album       => :album,
@@ -113,29 +109,6 @@ class Flac2mp3
         :compilation => :TCMP
       }
     end
-    
-    def flacdata(filename)
-      data = FlacInfo.new(filename)
-      data.tags.inject({}) do |hash, (key, value)|
-        key = key.to_s.downcase.to_sym
-        value = value.to_i if value.respond_to?(:match) and value.match(/^\d+$/)
-        value = value.to_s if string_fields.include?(key)
-        hash[key] = value
-        hash
-      end
-    end
-    
-    def mp3data(filename, tags)
-      raise TypeError, "Tags must be a hash" unless tags.is_a?(Hash)
-      Mp3Info.open(filename) do |mp3|
-        convert_tags(tags).each do |mp3tag, data|
-          tag = mp3.send(data[:target])
-          tag.send("#{mp3tag}=", data[:value])
-        end
-      end
-    end
-    
-    
     
     def string_fields
       [:title, :description]
@@ -171,8 +144,6 @@ class Flac2mp3
       
       mp3_tags
     end
-    
-    
     
     def default_encoding
       '--preset standard'
