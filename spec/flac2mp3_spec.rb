@@ -406,6 +406,120 @@ describe Flac2mp3 do
       @flac2mp3.convert_metadata(@filename, @out_filename)
     end
   end
+  
+  it 'should get flac metadata' do
+    @flac2mp3.should respond_to(:get_flacdata)
+  end
+  
+  describe 'when getting flac metadata' do
+    before :each do
+      @filename = 'test.flac'
+      @tags = {}
+      @flacinfo = stub('flacinfo', :tags => @tags)
+      FlacInfo.stubs(:new).returns(@flacinfo)
+    end
+    
+    it 'should accept a filename' do
+      lambda { @flac2mp3.get_flacdata(@filename) }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should require a filename' do
+      lambda { @flac2mp3.get_flacdata }.should raise_error(ArgumentError)
+    end
+    
+    it 'should create a FlacInfo object' do
+      FlacInfo.expects(:new).with(@filename).returns(@flacinfo)
+      @flac2mp3.get_flacdata(@filename)
+    end
+
+    it 'should use the FlacInfo object tags' do
+      @flacinfo.expects(:tags).returns(@tags)
+      @flac2mp3.get_flacdata(@filename)
+    end
+    
+    it 'should return a hash of the tag data' do
+      @tags[:artist] = 'blah'
+      @tags[:blah] = 'boo'
+      @tags[:comment] = 'hey'
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:artist].should == 'blah'
+      data[:blah].should == 'boo'
+      data[:comment].should == 'hey'
+    end
+    
+    it 'should convert tags to symbols' do
+      @tags['artist'] = 'blah'
+      @tags['blah'] = 'boo'
+      @tags['comment'] = 'hey'
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:artist].should == 'blah'
+      data[:blah].should == 'boo'
+      data[:comment].should == 'hey'
+
+      data.should_not have_key('artist')
+      data.should_not have_key('blah')
+      data.should_not have_key('comment')
+    end
+    
+    it 'should convert tags to lowercase' do
+      @tags['Artist'] = 'blah'
+      @tags[:BLAH] = 'boo'
+      @tags['cOmMeNt'] = 'hey'
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:artist].should == 'blah'
+      data[:blah].should == 'boo'
+      data[:comment].should == 'hey'
+
+      data.should_not have_key('Artist')
+      data.should_not have_key(:BLAH)
+      data.should_not have_key('cOmMeNt')
+    end
+    
+    it 'should convert values consisting only of digits to actual numbers' do
+      @tags[:track] = '12'
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:track].should == 12
+    end
+    
+    it 'should leave numeric values as numbers' do
+      @tags[:track] = 12
+      
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:track].should == 12
+    end
+    
+    it 'should leave numeric titles as strings' do
+      @tags[:title] = '45'  # This was my first run-in with this problem, the opening track on Elvis Costello's /When I Was Cruel/
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:title].should == '45'
+    end
+
+    it 'should leave numeric titles as strings even if the title key is not a simple downcased symbol' do
+      @tags['TITLE'] = '45'
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:title].should == '45'
+    end
+
+    it 'should leave numeric descriptions as strings' do
+      @tags[:description] = '1938'  # This was my first run-in with this problem, from the Boilermakers' version of "Minor Swing" where for the description all I had was the year of the original
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:description].should == '1938'
+    end
+
+    it 'should leave numeric descriptions as strings even if the description key is not a simple downcased symbol' do
+      @tags['DESCRIPTION'] = '1938'
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:description].should == '1938'
+    end
+  end
 end
 
 describe Flac2mp3 do

@@ -42,6 +42,17 @@ class Flac2mp3
     set_mp3data(outfile, get_flacdata(filename))
   end
   
+  def get_flacdata(filename)
+    FlacInfo.new(filename).tags.inject({}) do |hash, (key, value)|
+      key = key.to_s.downcase.to_sym
+      value = value.to_i if value.respond_to?(:match) and value.match(/^\d+$/)
+      value = value.to_s if self.class.string_fields.include?(key)
+      
+      hash[key] = value
+      hash
+    end
+  end
+  
   def options
     @options.dup
   end
@@ -129,7 +140,6 @@ class Flac2mp3
     end
     
     
-    private
     
     def string_fields
       [:title, :description]
@@ -166,7 +176,6 @@ class Flac2mp3
     end
     
     
-    public
     
     def default_encoding
       '--preset standard'
