@@ -520,6 +520,125 @@ describe Flac2mp3 do
       data[:description].should == '1938'
     end
   end
+  
+  it 'should set mp3 metadata' do
+    @flac2mp3.should respond_to(:set_mp3data)
+  end
+  
+  describe 'when setting mp3 metadata' do
+    before :each do
+      @filename = 'test.mp3'
+      @tags = {}
+      @mp3tags  = stub('mp3info tags')
+      @mp3tags2 = stub('mp3info tags 2')
+      @mp3info  = stub('mp3info obj', :tag => @mp3tags, :tag2 => @mp3tags2)
+      Mp3Info.stubs(:open).yields(@mp3info)
+    end
+    
+    it 'should accept a filename and tag data' do
+      lambda { @flac2mp3.set_mp3data(@filename, 'tag data') }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should require tag data' do
+      lambda { @flac2mp3.set_mp3data(@filename) }.should raise_error(ArgumentError)
+    end
+    
+    it 'should require a filename' do
+      lambda { @flac2mp3.set_mp3data }.should raise_error(ArgumentError)
+    end
+    
+    it 'should accept a hash of tag data' do
+      lambda { @flac2mp3.set_mp3data(@filename, 'tag data') }.should raise_error(TypeError)
+    end
+    
+    it 'should require a hash of tag data' do
+      lambda { @flac2mp3.set_mp3data(@filename, {}) }.should_not raise_error(TypeError)
+    end
+    
+    it 'should use an Mp3Info object' do
+      Mp3Info.expects(:open).with(@filename)
+      @flac2mp3.set_mp3data(@filename, @tags)
+    end
+    
+    it 'should set tags in the Mp3Info object' do
+      @tags[:album] = 'blah'
+      @tags[:artist] = 'boo'
+      @tags[:genre] = 'bang'
+
+      @mp3tags.expects(:album=).with(@tags[:album])
+      @mp3tags.expects(:artist=).with(@tags[:artist])
+      @mp3tags.expects(:genre_s=).with(@tags[:genre])
+
+      @flac2mp3.set_mp3data(@filename, @tags)
+    end
+
+    it 'should not set tags not given' do
+      @tags[:album] = 'blah'
+      @tags[:artist] = 'boo'
+      @tags[:genre] = 'bang'
+
+      @mp3tags.stubs(:album=)
+      @mp3tags.stubs(:artist=)
+      @mp3tags.stubs(:genre_s=)
+
+      @mp3tags.expects(:comments=).never
+      @mp3tags.expects(:year=).never
+
+      @flac2mp3.set_mp3data(@filename, @tags)
+    end
+
+    it 'should not set tags not known' do
+      @tags[:blah] = 'blah'
+      @tags[:bang] = 'bang'
+
+      @mp3tags.expects(:blah=).never
+      @mp3tags.expects(:bang=).never
+
+      @flac2mp3.set_mp3data(@filename, @tags)
+    end
+
+    it 'should use tag2 for bpm' do
+      @tags[:bpm] = '5'
+
+      @mp3tags2.expects(:TBPM=).with(@tags[:bpm])
+
+      @flac2mp3.set_mp3data(@filename, @tags)
+    end
+
+    it 'should use tag2 for composer' do
+      @tags[:composer] = 'Il Maestro'
+
+      @mp3tags2.expects(:TCOM=).with(@tags[:composer])
+
+      @flac2mp3.set_mp3data(@filename, @tags)
+    end
+
+    it 'should use tag2 for compilation' do
+      @tags[:compilation] = '1'
+
+      @mp3tags2.expects(:TCMP=).with(@tags[:compilation])
+
+      @flac2mp3.set_mp3data(@filename, @tags)
+    end
+
+    it 'should set tag2 track to be a combination of tracknumber and tracktotal' do
+      @tags[:tracknumber] = 4
+      @tags[:tracktotal]  = 15
+
+      @mp3tags2.expects(:TRCK=).with('4/15')
+
+      @flac2mp3.set_mp3data(@filename, @tags)
+    end
+
+    it "should set tag2 'pos' to be a combination of discnumber and disctotal" do
+      @tags[:discnumber] = 1
+      @tags[:disctotal]  = 2
+
+      @mp3tags2.expects(:TPOS=).with('1/2')
+
+      @flac2mp3.set_mp3data(@filename, @tags)
+    end
+  end
 end
 
 describe Flac2mp3 do

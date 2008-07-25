@@ -53,6 +53,16 @@ class Flac2mp3
     end
   end
   
+  def set_mp3data(filename, tags)
+    raise TypeError, "Tags must be a hash" unless tags.is_a?(Hash)
+    Mp3Info.open(filename) do |mp3|
+      self.class.convert_tags(tags).each do |mp3tag, data|
+        tag = mp3.send(data[:target])
+        tag.send("#{mp3tag}=", data[:value])
+      end
+    end
+  end
+  
   def options
     @options.dup
   end
@@ -172,6 +182,7 @@ class Flac2mp3
         target = tag2_fields.include?(key) ? :tag2 : :tag
         mp3_tags[mp3tag] = { :target => target, :value => value }
       end
+      
       mp3_tags
     end
     
