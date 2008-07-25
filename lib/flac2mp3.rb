@@ -110,21 +110,6 @@ class Flac2mp3
       }
     end
     
-    def string_fields
-      [:title, :description]
-    end
-    
-    def tag2_fields
-      [:bpm, :composer, :compilation, :tracktotal, :tracknumber, :disctotal, :discnumber]
-    end
-    
-    def tag_formats
-      {
-        :TRCK => ':tracknumber/:tracktotal',
-        :TPOS => ':discnumber/:disctotal'
-      }
-    end
-    
     def convert_tags(tags)
       mp3_tags = {}
       
@@ -147,6 +132,21 @@ class Flac2mp3
     
     def default_encoding
       '--preset standard'
+    end
+    
+    def string_fields
+      [:title, :description]
+    end
+    
+    def tag2_fields
+      [:bpm, :composer, :compilation, :tracktotal, :tracknumber, :disctotal, :discnumber]
+    end
+    
+    def tag_formats
+      {
+        :TRCK => ':tracknumber/:tracktotal',
+        :TPOS => ':discnumber/:disctotal'
+      }
     end
   end
 end
