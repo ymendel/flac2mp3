@@ -1,5 +1,4 @@
 $:.unshift File.dirname(__FILE__)
-require 'flac2mp3/string_extensions'
 require 'flacinfo'
 require 'mp3info'
 
