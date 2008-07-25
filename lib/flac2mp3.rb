@@ -89,21 +89,7 @@ class Flac2mp3
   
   class << self
     def convert(filename, options = {})
-      raise TypeError, "'#{filename}' is not a file" unless FileTest.file?(filename)
-      filename.extend(Flac2mp3::StringExtensions)
-      out_filename = output_filename(filename)
-      out_filename.extend(Flac2mp3::StringExtensions)
-      
-      commands = { :flac => 'flac', :mp3 => 'lame' }
-      commands.each { |k, v|  v << ' --silent' } if options[:silent]
-      encoding = options[:encoding]
-      encoding = default_encoding if encoding.to_s.strip.empty?
-      
-      system "#{commands[:flac]} --stdout --decode #{filename.safequote} | #{commands[:mp3]} #{encoding} - #{out_filename.safequote}"
-      
-      mp3data(out_filename, flacdata(filename))
-      
-      File.delete(filename) if options[:delete]
+      new(options).convert(filename)
     end
     
     def output_filename(filename)

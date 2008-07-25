@@ -639,13 +639,51 @@ describe Flac2mp3 do
       @flac2mp3.set_mp3data(@filename, @tags)
     end
   end
+  
+  describe 'as a class' do
+    it 'should convert' do
+      Flac2mp3.should respond_to(:convert)
+    end
+    
+    describe 'when converting' do
+      before :each do
+        @filename = 'test.flac'
+        @options  = { :silent => true, :delete => false, :fish => :flat }
+        @flac2mp3 = stub('flac2mp3 object', :convert => nil)
+        Flac2mp3.stubs(:new).returns(@flac2mp3)
+      end
+      
+      it 'should accept a filename and a hash of options' do
+        lambda { Flac2mp3.convert(@filename, @options) }.should_not raise_error(ArgumentError)
+      end
+      
+      it 'should not require options' do
+        lambda { Flac2mp3.convert(@filename) }.should_not raise_error(ArgumentError)
+      end
+      
+      it 'should require a filename' do
+        lambda { Flac2mp3.convert }.should raise_error(ArgumentError)
+      end
+      
+      it 'should instantiate a new Flac2mp3 object' do
+        Flac2mp3.expects(:new).returns(@flac2mp3)
+        Flac2mp3.convert(@filename)
+      end
+      
+      it 'should pass the options when instantiating the Flac2mp3 object' do
+        Flac2mp3.expects(:new).with(@options).returns(@flac2mp3)
+        Flac2mp3.convert(@filename, @options)
+      end
+      
+      it 'should use the Flac2mp3 object to convert the given file' do
+        @flac2mp3.expects(:convert).with(@filename)
+        Flac2mp3.convert(@filename)
+      end
+    end
+  end
 end
 
 describe Flac2mp3 do
-  it 'should convert' do
-    Flac2mp3.should respond_to(:convert)
-  end
-  
   it 'should provide output filename' do
     Flac2mp3.should respond_to(:output_filename)
   end
@@ -660,148 +698,6 @@ describe Flac2mp3 do
   
   it 'should set MP3 tag data' do
     Flac2mp3.should respond_to(:mp3data)
-  end
-end
-
-describe Flac2mp3, 'when converting' do
-  before :each do
-    Flac2mp3.stubs(:system)
-    Flac2mp3.stubs(:flacdata)
-    Flac2mp3.stubs(:mp3data)
-    File.stubs(:delete)
-  end
-
-  it 'should require a filename' do
-    lambda { Flac2mp3.convert }.should raise_error(ArgumentError)
-  end
-  
-  it 'should accept a filename' do
-    lambda { Flac2mp3.convert('blah.flac') }.should_not raise_error(ArgumentError)
-  end
-  
-  it 'should check if the filename belongs to a regular file' do
-    filename = 'blah.flac'
-    FileTest.expects(:file?).with(filename).returns(true)
-    Flac2mp3.convert(filename)
-  end
-end
-
-describe Flac2mp3, 'when converting and given a filename belonging to a regular file' do
-  before :each do
-    @filename = 'blah.flac'
-    FileTest.stubs(:file?).with(@filename).returns(true)
-    @output_filename = 'blah.mp3'
-    Flac2mp3.stubs(:output_filename).with(@filename).returns(@output_filename)
-    Flac2mp3.stubs(:system)
-    
-    @filename.stubs(:safequote).returns('-blah-flac-')
-    @output_filename.stubs(:safequote).returns('-blah-mp3-')
-    
-    @flacdata = {}
-    Flac2mp3.stubs(:flacdata).with(@filename).returns(@flacdata)
-    Flac2mp3.stubs(:mp3data)
-  end
-  
-  it 'should not error' do
-    lambda { Flac2mp3.convert(@filename) }.should_not raise_error(TypeError)
-  end
-  
-  it 'should extend the filename with the string extensions' do
-    @filename.expects(:extend).with(Flac2mp3::StringExtensions).returns(@filename)
-    Flac2mp3.convert(@filename)
-  end
-  
-  it 'should get the output filename' do
-    Flac2mp3.expects(:output_filename).with(@filename).returns('outfile')
-    Flac2mp3.convert(@filename)
-  end
-  
-  it 'should extend the output filename with the string extensions' do
-    @output_filename.expects(:extend).with(Flac2mp3::StringExtensions).returns(@output_filename)
-    Flac2mp3.convert(@filename)
-  end
-  
-  it 'should use system commands to convert the FLAC to an MP3' do
-    Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
-    Flac2mp3.convert(@filename)
-  end
-  
-  it 'should set the MP3 tags from the FLAC data' do
-    Flac2mp3.expects(:mp3data).with(@output_filename, @flacdata)
-    Flac2mp3.convert(@filename)
-  end
-  
-  it 'should accept an option to delete the flac' do
-    lambda { Flac2mp3.convert(@filename, :delete => true) }.should_not raise_error(ArgumentError)
-  end
-  
-  it 'should delete the original file if given a true value for the option' do
-    File.expects(:delete).with(@filename)
-    Flac2mp3.convert(@filename, :delete => true)
-  end
-  
-  it 'should not delete the original file if given a false value for the option' do
-    File.expects(:delete).never
-    Flac2mp3.convert(@filename, :delete => false)
-  end
-  
-  it 'should not delete the original file by default' do
-    File.expects(:delete).never
-    Flac2mp3.convert(@filename)
-  end
-  
-  it 'should accept an option to run silently' do
-    lambda { Flac2mp3.convert(@filename, :silent => true) }.should_not raise_error(ArgumentError)
-  end
-  
-  it 'should tell the system commands to be silent if given a true value for the option' do
-    Flac2mp3.expects(:system).with("flac --silent --stdout --decode #{@filename.safequote} | lame --silent --preset standard - #{@output_filename.safequote}")
-    Flac2mp3.convert(@filename, :silent => true)
-  end
-  
-  it 'should not tell the system commands to be silent if given a true value for the option' do
-    Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
-    Flac2mp3.convert(@filename, :silent => false)
-  end
-  
-  it 'should not tell the system commands to be silent by default' do
-    Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
-    Flac2mp3.convert(@filename)
-  end
-  
-  it 'should accept an option for encoding options' do
-    lambda { Flac2mp3.convert(@filename, :encoding => '--preset fast standard') }.should_not raise_error(ArgumentError)
-  end
-  
-  it 'should use the encoding options if given' do
-    Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --vbr-new -V2 -h - #{@output_filename.safequote}")
-    Flac2mp3.convert(@filename, :encoding => '--vbr-new -V2 -h')
-  end
-  
-  it 'should default the encoding to --preset standard if no encoding options given' do
-    Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
-    Flac2mp3.convert(@filename)
-  end
-  
-  it 'should default the encoding to --preset standard if nil encoding options given' do
-    Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
-    Flac2mp3.convert(@filename, :encoding => nil)
-  end
-  
-  it 'should default the encoding to --preset standard if blank encoding options given' do
-    Flac2mp3.expects(:system).with("flac --stdout --decode #{@filename.safequote} | lame --preset standard - #{@output_filename.safequote}")
-    Flac2mp3.convert(@filename, :encoding => ' ')
-  end
-end
-
-describe Flac2mp3, 'when converting and given a filename not belonging to a regular file' do
-  before :each do
-    @filename = 'blah.flac'
-    FileTest.stubs(:file?).with(@filename).returns(false)
-  end
-  
-  it 'should error' do
-    lambda { Flac2mp3.convert(@filename) }.should raise_error(TypeError)
   end
 end
 
