@@ -31,6 +31,13 @@ class Flac2mp3
     "#{command} --stdout --decode #{safequote(filename)}"
   end
   
+  def mp3_command(filename)
+    command = 'lame'
+    command << ' --silent' if silent?
+    
+    "#{command} #{encoding} - #{safequote(filename)}"
+  end
+  
   def options
     @options.dup
   end

@@ -281,7 +281,65 @@ describe Flac2mp3 do
       end
     end
   end
-
+  
+  it 'should provide an mp3 command' do
+    @flac2mp3.should respond_to(:mp3_command)
+  end
+  
+  describe 'when providing an mp3 command' do
+    before :each do
+      @filename = 'test.mp3'
+      @safe_filename = 'safetest.safemp3'
+      @flac2mp3.stubs(:safequote).returns(@safe_filename)
+      @flac2mp3.stubs(:silent?)
+      @encoding = '--VAWESOME'
+      @flac2mp3.stubs(:encoding).returns(@encoding)
+    end
+    
+    it 'should accept a filename' do
+      lambda { @flac2mp3.mp3_command(@filename) }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should require a filename' do
+      lambda { @flac2mp3.mp3_command }.should raise_error(ArgumentError)
+    end
+    
+    it 'should safequote the filename' do
+      @flac2mp3.expects(:safequote).with(@filename)
+      @flac2mp3.mp3_command(@filename)
+    end
+    
+    it 'should check if the command should be silent' do
+      @flac2mp3.expects(:silent?)
+      @flac2mp3.mp3_command(@filename)
+    end
+    
+    it 'should check the encoding to use' do
+      @flac2mp3.expects(:encoding)
+      @flac2mp3.mp3_command(@filename)
+    end
+    
+    describe 'when the command should be silent' do
+      before :each do
+        @flac2mp3.stubs(:silent?).returns(true)
+      end
+      
+      it 'should provide an mp3 shell command that will be silent' do
+        @flac2mp3.mp3_command(@filename).should == "lame --silent #{@encoding} - #{@safe_filename}"
+      end
+    end
+    
+    describe 'when the command should not be silent' do
+      before :each do
+        @flac2mp3.stubs(:silent?).returns(false)
+      end
+      
+      it 'should provide an mp3 shell command that will not be silent' do
+        @flac2mp3.mp3_command(@filename).should == "lame #{@encoding} - #{@safe_filename}"
+      end
+    end
+  end
+  
   it 'should quote filenames safely' do
     @flac2mp3.should respond_to(:safequote)
   end
