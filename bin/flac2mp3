@@ -32,7 +32,7 @@ BANNER
   opts.on('-s', '--silent',
           "Don't show progress") { |silent|  OPTIONS[:silent] = silent }
   opts.on('-e', '--encoding=ENCODING', String,
-          "Set lame encoding options", "Default: --preset standard") { |encoding|  OPTIONS[:encoding] = encoding }
+          "Set lame encoding options", "Default: #{Flac2mp3.default_encoding}") { |encoding|  OPTIONS[:encoding] = encoding }
   opts.on('-h', '--help',
           'Show this help message.') { puts opts; exit }
   opts.parse!(ARGV)
