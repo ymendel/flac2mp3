@@ -32,49 +32,6 @@ describe Flac2mp3 do
       Flac2mp3.any_instance.expects(:set_options).with({})
       Flac2mp3.new
     end
-    
-    it 'should store the options' do
-      Flac2mp3.new(@options).options.should == @options
-    end
-    
-    it 'should not allow changes to the options' do
-      flac2mp3 = Flac2mp3.new(@options.dup)
-      flac2mp3.options[:some_key] = 'some value'
-      flac2mp3.options.should == @options
-    end
-    
-    it 'should indicate the original file should be deleted when a true option is given' do
-      Flac2mp3.new(:delete => true).delete?.should be(true)
-    end
-    
-    it 'should indicate the original file should not be deleted when a false option is given' do
-      Flac2mp3.new(:delete => false).delete?.should be(false)
-    end
-    
-    it 'should indicate the original file should not be deleted when no option is given' do
-      Flac2mp3.new.delete?.should be(false)
-    end
-    
-    it 'should indicate the conversion should be silent when a true option is given' do
-      Flac2mp3.new(:silent => true).silent?.should be(true)
-    end
-    
-    it 'should indicate the conversion should not be silent when a false option is given' do
-      Flac2mp3.new(:silent => false).silent?.should be(false)
-    end
-    
-    it 'should indicate the conversion should not be silent when no option is given' do
-      Flac2mp3.new.silent?.should be(false)
-    end
-    
-    it 'should store the given encoding' do
-      encoding = '-VAWESOME'
-      Flac2mp3.new(:encoding => encoding).encoding.should == encoding
-    end
-    
-    it 'should default the encoding to --preset standard' do
-      Flac2mp3.new.encoding.should == '--preset standard'
-    end
   end
   
   it 'should load the configuration' do
@@ -168,6 +125,49 @@ describe Flac2mp3 do
       @flac2mp3.set_options(@options.dup)
       @flac2mp3.options[:some_key] = 'some value'
       @flac2mp3.options.should == @options
+    end
+  end
+  
+  describe 'querying options' do
+    it 'should indicate the original file should be deleted when a true option is given' do
+      @flac2mp3.set_options(:delete => true)
+      @flac2mp3.delete?.should be(true)
+    end
+    
+    it 'should indicate the original file should not be deleted when a false option is given' do
+      @flac2mp3.set_options(:delete => false)
+      @flac2mp3.delete?.should be(false)
+    end
+    
+    it 'should indicate the original file should not be deleted when no option is given' do
+      @flac2mp3.set_options({})
+      @flac2mp3.delete?.should be(false)
+    end
+    
+    it 'should indicate the conversion should be silent when a true option is given' do
+      @flac2mp3.set_options(:silent => true)
+      @flac2mp3.silent?.should be(true)
+    end
+    
+    it 'should indicate the conversion should not be silent when a false option is given' do
+      @flac2mp3.set_options(:silent => false)
+      @flac2mp3.silent?.should be(false)
+    end
+    
+    it 'should indicate the conversion should not be silent when no option is given' do
+      @flac2mp3.set_options({})
+      @flac2mp3.silent?.should be(false)
+    end
+    
+    it 'should store the given encoding' do
+      encoding = '-VAWESOME'
+      @flac2mp3.set_options(:encoding => encoding)
+      @flac2mp3.encoding.should == encoding
+    end
+    
+    it 'should default the encoding to --preset standard' do
+      @flac2mp3.set_options({})
+      @flac2mp3.encoding.should == '--preset standard'
     end
   end
   
