@@ -50,4 +50,4 @@ unless filename
   exit
 end
 
-Flac2mp3.convert(filename.dup, OPTIONS)
+Flac2mp3.convert(filename, OPTIONS)

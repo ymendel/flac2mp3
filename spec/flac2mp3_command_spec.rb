@@ -36,12 +36,6 @@ describe 'flac2mp3 command' do
     run_command('blah')
   end
   
-  it 'should duplicate the filename' do
-    filename = 'blah'
-    filename.expects(:dup).returns(filename)
-    run_command(filename)
-  end
-  
   it 'should pass on a true flac-deletion option if specified on the command line (using --delete)' do
     Flac2mp3.expects(:convert).with(anything, has_entry(:delete => true))
     run_command('blah', '--delete')
