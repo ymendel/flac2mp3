@@ -5,6 +5,7 @@ require 'yaml'
 
 class Flac2mp3
   def initialize(options = {})
+    @config = {}
     load_config
     set_options(options)
   end
@@ -21,7 +22,7 @@ class Flac2mp3
   
   def set_options(options)
     raise TypeError, 'options must be a hash' unless options.is_a?(Hash)
-    @options = options
+    @options = config.merge(options)
   end
   
   def convert(filename)

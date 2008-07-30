@@ -169,6 +169,27 @@ describe Flac2mp3 do
       @flac2mp3.set_options({})
       @flac2mp3.encoding.should == '--preset standard'
     end
+    
+    it 'should use values from the configuration' do
+      config = {:silent => true}
+      File.stubs(:read).returns(config.to_yaml)
+      Flac2mp3.new.silent?.should be(true)
+    end
+    
+    it 'should override configuration values with options' do
+      config = {:silent => true}
+      File.stubs(:read).returns(config.to_yaml)
+      Flac2mp3.new(:silent => false).silent?.should be(false)
+    end
+    
+    it 'should combine configuration and option values' do
+      config = {:silent => true}
+      File.stubs(:read).returns(config.to_yaml)
+      flac2mp3 = Flac2mp3.new(:delete => true)
+      
+      flac2mp3.silent?.should be(true)
+      flac2mp3.delete?.should be(true)
+    end
   end
   
   it 'should convert' do
