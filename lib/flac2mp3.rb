@@ -10,21 +10,6 @@ class Flac2mp3
     set_options(options)
   end
   
-  def load_config
-    yaml = YAML.load(File.read(File.expand_path('~/.flac2mp3'))) || {}
-    @config = yaml.inject({}) do |hash, (key, value)|
-      hash[key.to_sym] = value
-      hash
-    end
-  rescue Errno::ENOENT
-    @config = {}
-  end
-  
-  def set_options(options)
-    raise TypeError, 'options must be a hash' unless options.is_a?(Hash)
-    @options = config.merge(options)
-  end
-  
   def convert(filename)
     raise TypeError, "'#{filename}' is not a file" unless FileTest.file?(filename)
     process_conversion(filename)
@@ -78,6 +63,21 @@ class Flac2mp3
         tag.send("#{mp3tag}=", data[:value])
       end
     end
+  end
+  
+  def load_config
+    yaml = YAML.load(File.read(File.expand_path('~/.flac2mp3'))) || {}
+    @config = yaml.inject({}) do |hash, (key, value)|
+      hash[key.to_sym] = value
+      hash
+    end
+  rescue Errno::ENOENT
+    @config = {}
+  end
+  
+  def set_options(options)
+    raise TypeError, 'options must be a hash' unless options.is_a?(Hash)
+    @options = config.merge(options)
   end
   
   def options
