@@ -23,6 +23,16 @@ describe Flac2mp3 do
       Flac2mp3.new
     end
     
+    it 'should set the options' do
+      Flac2mp3.any_instance.expects(:set_options).with(@options)
+      Flac2mp3.new(@options)
+    end
+    
+    it 'should default to empty options' do
+      Flac2mp3.any_instance.expects(:set_options).with({})
+      Flac2mp3.new
+    end
+    
     it 'should store the options' do
       Flac2mp3.new(@options).options.should == @options
     end
@@ -121,6 +131,43 @@ describe Flac2mp3 do
       it 'should store an empty config' do
         Flac2mp3.new.config.should == {}
       end
+    end
+  end
+  
+  it 'should set options' do
+    @flac2mp3.should respond_to(:set_options)
+  end
+  
+  describe 'setting options' do
+    before :each do
+      @options = { :silent => true, :delete => false }
+    end
+    
+    it 'should accept options' do
+      lambda { @flac2mp3.set_options(:silent => true) }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should require options' do
+      lambda { @flac2mp3.set_options }.should raise_error(ArgumentError)
+    end
+    
+    it 'should accept a hash of options' do
+      lambda { @flac2mp3.set_options(:silent => true) }.should_not raise_error(TypeError)
+    end
+    
+    it 'should require a hash of options' do
+      lambda { @flac2mp3.set_options('silent') }.should raise_error(TypeError)
+    end
+    
+    it 'should store the options' do
+      @flac2mp3.set_options(@options)
+      @flac2mp3.options.should == @options
+    end
+    
+    it 'should not allow changes to the options' do
+      @flac2mp3.set_options(@options.dup)
+      @flac2mp3.options[:some_key] = 'some value'
+      @flac2mp3.options.should == @options
     end
   end
   

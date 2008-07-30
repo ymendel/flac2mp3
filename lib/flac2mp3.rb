@@ -6,7 +6,7 @@ require 'yaml'
 class Flac2mp3
   def initialize(options = {})
     load_config
-    @options = options
+    set_options(options)
   end
   
   def load_config
@@ -17,6 +17,11 @@ class Flac2mp3
     end
   rescue Errno::ENOENT
     @config = {}
+  end
+  
+  def set_options(options)
+    raise TypeError, 'options must be a hash' unless options.is_a?(Hash)
+    @options = options
   end
   
   def convert(filename)
