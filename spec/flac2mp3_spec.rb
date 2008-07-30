@@ -18,6 +18,11 @@ describe Flac2mp3 do
       lambda { Flac2mp3.new }.should_not raise_error(ArgumentError)
     end
     
+    it 'should load the configuration' do
+      Flac2mp3.any_instance.expects(:load_config)
+      Flac2mp3.new
+    end
+    
     it 'should store the options' do
       Flac2mp3.new(@options).options.should == @options
     end
@@ -59,6 +64,63 @@ describe Flac2mp3 do
     
     it 'should default the encoding to --preset standard' do
       Flac2mp3.new.encoding.should == '--preset standard'
+    end
+  end
+  
+  it 'should load the configuration' do
+    @flac2mp3.should respond_to(:load_config)
+  end
+  
+  describe 'loading the configuration' do
+    it 'should look for a config file' do
+      File.expects(:read).with(File.expand_path('~/.flac2mp3')).returns('')
+      @flac2mp3.load_config
+    end
+    
+    describe 'when a config file is found' do
+      before :each do
+        @config = { :silent => true, :delete => false }
+        @contents = @config.to_yaml
+        File.stubs(:read).returns(@contents)
+      end
+      
+      it 'should parse the file as YAML' do
+        YAML.expects(:load).with(@contents)
+        @flac2mp3.load_config
+      end
+      
+      it 'should store the config' do
+        @flac2mp3.load_config
+        @flac2mp3.config.should == @config
+      end
+      
+      it 'should convert string keys to symbols' do
+        File.stubs(:read).returns({ 'silent' => true, 'delete' => false }.to_yaml)
+        @flac2mp3.load_config
+        @flac2mp3.config.should == @config
+      end
+      
+      it 'should handle an empty file' do
+        File.stubs(:read).returns('')
+        @flac2mp3.load_config
+        @flac2mp3.config.should == {}
+      end
+      
+      it 'should not allow changes to the config' do
+        @flac2mp3.load_config
+        @flac2mp3.config[:some_key] = 'some value'
+        @flac2mp3.config.should == @config
+      end
+    end
+    
+    describe 'when no config file is found' do
+      before :each do
+        File.stubs(:read).raises(Errno::ENOENT)
+      end
+      
+      it 'should store an empty config' do
+        Flac2mp3.new.config.should == {}
+      end
     end
   end
   

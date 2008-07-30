@@ -1,10 +1,22 @@
 $:.unshift File.dirname(__FILE__)
 require 'flacinfo'
 require 'mp3info'
+require 'yaml'
 
 class Flac2mp3
   def initialize(options = {})
+    load_config
     @options = options
+  end
+  
+  def load_config
+    yaml = YAML.load(File.read(File.expand_path('~/.flac2mp3'))) || {}
+    @config = yaml.inject({}) do |hash, (key, value)|
+      hash[key.to_sym] = value
+      hash
+    end
+  rescue Errno::ENOENT
+    @config = {}
   end
   
   def convert(filename)
@@ -64,6 +76,10 @@ class Flac2mp3
   
   def options
     @options.dup
+  end
+  
+  def config
+    @config.dup
   end
   
   def delete?
