@@ -51,8 +51,8 @@ describe 'flac2mp3 command' do
     run_command('blah', '-d')
   end
   
-  it 'should pass on a false flac-deletion option if nothing specified on the command line' do
-    Flac2mp3.expects(:convert).with(anything, has_entry(:delete => false))
+  it 'should not pass on any flac-deletion option if nothing specified on the command line' do
+    Flac2mp3.expects(:convert).with(anything, Not(has_key(:delete)))
     run_command('blah')
   end
   
@@ -66,8 +66,8 @@ describe 'flac2mp3 command' do
     run_command('blah', '-s')
   end
   
-  it 'should pass on a false silence option if nothing specified on the command line' do
-    Flac2mp3.expects(:convert).with(anything, has_entry(:silent => false))
+  it 'should not pass on any silence option if nothing specified on the command line' do
+    Flac2mp3.expects(:convert).with(anything, Not(has_key(:silent)))
     run_command('blah')
   end
   
