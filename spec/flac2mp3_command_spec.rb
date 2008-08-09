@@ -9,11 +9,6 @@ describe 'flac2mp3 command' do
     end
   end
   
-  before :all do
-    path = File.join(File.dirname(__FILE__), *%w[.. bin])
-    ENV['PATH'] = [path, ENV['PATH']].join(':')
-  end
-  
   before :each do
     Flac2mp3.stubs(:convert)
     
