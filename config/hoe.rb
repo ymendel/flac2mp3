@@ -2,11 +2,19 @@ require 'flac2mp3/version'
 
 AUTHOR = 'Yossef Mendelssohn'  # can also be an array of Authors
 EMAIL = 'ymendel@pobox.com'
-DESCRIPTION = "description of gem"
+DESCRIPTION = 'converter for FLAC to MP3'
 GEM_NAME = 'flac2mp3' # what ppl will type to install your gem
 RUBYFORGE_PROJECT = 'yomendel' # The unix name for your project
 HOMEPATH = "http://#{RUBYFORGE_PROJECT}.rubyforge.org"
 DOWNLOAD_PATH = "http://rubyforge.org/projects/#{RUBYFORGE_PROJECT}"
+EXTRA_DEPENDENCIES = [
+  ['flacinfo-rb',  '>= 0.4'],
+  ['ruby-mp3info', '>= 0.5.1']
+]    # An array of rubygem dependencies [name, version]
+EXTRA_DEV_DEPENDENCIES = [
+  ['rspec', '>= 1.1.4'],
+  ['mocha', '>= 0.9.1']
+]    # An array of rubygem dependencies [name, version]
 
 @config_file = "~/.rubyforge/user-config.yml"
 @config = nil
@@ -59,10 +67,8 @@ hoe = Hoe.new(GEM_NAME, VERS) do |p|
   
   # == Optional
   p.changes = p.paragraphs_of("History.txt", 0..1).join("\n\n")
-  p.extra_deps = [       # An array of rubygem dependencies [name, version], e.g. [ ['active_support', '>= 1.3.1'] ]
-    ['flacinfo-rb',  '>= 0.4'],
-    ['ruby-mp3info', '>= 0.5.1']
-  ]
+  p.extra_deps = EXTRA_DEPENDENCIES
+  p.extra_dev_deps = EXTRA_DEV_DEPENDENCIES
   
   #p.spec_extras = {}    # A hash of extra values to set in the gemspec.
   
