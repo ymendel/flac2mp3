@@ -129,6 +129,11 @@ describe Flac2mp3 do
   end
   
   describe 'querying options' do
+    before :each do
+      File.stubs(:read).returns('')
+      @flac2mp3.load_config
+    end
+    
     it 'should indicate the original file should be deleted when a true option is given' do
       @flac2mp3.set_options(:delete => true)
       @flac2mp3.delete?.should be(true)
