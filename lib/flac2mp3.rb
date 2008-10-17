@@ -127,7 +127,8 @@ class Flac2mp3
         :tracktotal  => :TRCK,
         :discnumber  => :TPOS,
         :disctotal   => :TPOS,
-        :compilation => :TCMP
+        :compilation => :TCMP,
+        :tag         => :TIT1
       }
     end
     
@@ -160,7 +161,7 @@ class Flac2mp3
     end
     
     def tag2_fields
-      [:bpm, :composer, :compilation, :tracktotal, :tracknumber, :disctotal, :discnumber]
+      [:bpm, :composer, :compilation, :tracktotal, :tracknumber, :disctotal, :discnumber, :tag]
     end
     
     def tag_formats

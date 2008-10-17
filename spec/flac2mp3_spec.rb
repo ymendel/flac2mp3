@@ -755,6 +755,14 @@ describe Flac2mp3 do
 
       @flac2mp3.set_mp3data(@filename, @tags)
     end
+    
+    it "should use tag2 for 'tag' ('grouping')" do
+      @tags[:tag] = 'one, two, three, oclock'
+
+      @mp3tags2.expects(:TIT1=).with(@tags[:tag])
+
+      @flac2mp3.set_mp3data(@filename, @tags)
+    end
 
     it 'should set tag2 track to be a combination of tracknumber and tracktotal' do
       @tags[:tracknumber] = 4
@@ -875,6 +883,10 @@ describe Flac2mp3 do
 
       it "should map 'compilation' to 'TCMP'" do
         Flac2mp3.tag_mapping[:compilation].should == :TCMP
+      end
+      
+      it "should map 'tag' to 'TIT1'" do
+        Flac2mp3.tag_mapping[:tag].should == :TIT1
       end
     end
   end
