@@ -1,3 +1,8 @@
+== 0.3.1 2008-10-17
+
+* 1 enhancement:
+  * Content grouping ('tag', 'grouping') now carried over from FLAC to MP3 tags
+
 == 0.3.0 2008-07-29
 
 * 2 enhancements:
