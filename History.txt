@@ -1,3 +1,10 @@
+== 0.3.2 2008-11-29
+
+* 3 enhancements:
+  * Added command-line option for only converting metadata
+  * Added new command for metadata conversion
+  * Added class method for metadata conversion
+
 == 0.3.1 2008-10-17
 
 * 1 enhancement:
