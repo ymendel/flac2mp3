@@ -17,6 +17,7 @@ require 'flac2mp3/version'
 
 OPTIONS = {}
 MANDATORY_OPTIONS = %w[]
+meta = false
 
 parser = OptionParser.new do |opts|
   opts.banner = <<BANNER
@@ -33,6 +34,8 @@ BANNER
           "Don't show progress") { |silent|  OPTIONS[:silent] = silent }
   opts.on('-e', '--encoding=ENCODING', String,
           "Set lame encoding options", "Default: #{Flac2mp3.default_encoding}") { |encoding|  OPTIONS[:encoding] = encoding }
+  opts.on('-m', '--meta',
+          'Convert metadata (requires a second filename)') { meta = true }
   opts.on('-h', '--help',
           'Show this help message.') { puts opts; exit }
   opts.parse!(ARGV)
@@ -45,9 +48,19 @@ end
 # do stuff
 filename = ARGV[0]
 
-unless filename
-  puts "Usage: #{File.basename($0)} [filename]"
-  exit
-end
+if meta
+  mp3file = ARGV[1]
+  unless filename and mp3file
+    puts "Usage: #{File.basename($0)} --meta [filename] [mp3file]"
+    exit
+  end
+  
+  Flac2mp3.convert_metadata(filename, mp3file)
+else
+  unless filename
+    puts "Usage: #{File.basename($0)} [filename]"
+    exit
+  end
 
-Flac2mp3.convert(filename, OPTIONS)
+  Flac2mp3.convert(filename, OPTIONS)
+end

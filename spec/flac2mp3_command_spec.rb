@@ -10,7 +10,9 @@ describe 'flac2mp3 command' do
   end
   
   before :each do
-    Flac2mp3.stubs(:convert)
+    @convert_state = states('convert').starts_as('setup')
+    Flac2mp3.stubs(:convert).when(@convert_state.is('setup'))
+    Flac2mp3.stubs(:convert_metadata)
     
     [:ARGV, :OPTIONS, :MANDATORY_OPTIONS].each do |const|
       Object.send(:remove_const, const) if Object.const_defined?(const)
@@ -79,5 +81,37 @@ describe 'flac2mp3 command' do
   it 'should pass on no encoding option if none specified on the command line' do
     Flac2mp3.expects(:convert).with(anything, Not(has_key(:encoding)))
     run_command('blah')
+  end
+  
+  it 'should take a --meta option to convert metadata' do
+    lambda { run_command('--meta', 'blah.flac', 'something.mp3') }.should_not raise_error(OptionParser::InvalidOption)
+  end
+  
+  describe 'when converting metadata' do
+    before :each do
+      @infile = 'blah.flac'
+      @outfile = 'something.mp3'
+    end
+    
+    it 'should require two filenames' do
+      self.expects(:puts) { |text|  text.match(/usage.+filename/i) }
+      run_command('--meta', @infile)
+    end
+    
+    it 'should pass the filenames to Flac2mp3 for metadata conversion' do
+      Flac2mp3.expects(:convert_metadata).with(@infile, @outfile)
+      run_command('--meta', @infile, @outfile)
+    end
+    
+    it 'should not attempt to convert any files' do
+      @convert_state.become('test')
+      Flac2mp3.expects(:convert).never.when(@convert_state.is('test'))
+      run_command('--meta', @infile, @outfile)
+    end
+    
+    it 'should accept a shorthand -m option' do
+      Flac2mp3.expects(:convert_metadata).with(@infile, @outfile)
+      run_command('-m', @infile, @outfile)
+    end
   end
 end
