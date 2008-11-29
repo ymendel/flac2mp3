@@ -11,9 +11,6 @@ end
 
 require 'optparse'
 require 'flac2mp3'
-require 'flac2mp3/version'
-
-# NOTE: the option -p/--path= is given as an example, and should probably be replaced in your application.
 
 OPTIONS = {}
 MANDATORY_OPTIONS = %w[]
@@ -27,7 +24,7 @@ Options are:
 BANNER
   opts.separator ''
   opts.on('-v', '--version',
-          "Show the #{File.basename($0)} version number and exit") { puts "flac2mp3 #{Flac2mp3::VERSION::STRING}"; exit }
+          "Show the #{File.basename($0)} version number and exit") { require 'flac2mp3/version'; puts "flac2mp3 #{Flac2mp3::VERSION::STRING}"; exit }
   opts.on('-d', '--[no-]delete',
           "Delete the original file after conversion") { |delete|  OPTIONS[:delete] = delete }
   opts.on('-s', '--silent',
