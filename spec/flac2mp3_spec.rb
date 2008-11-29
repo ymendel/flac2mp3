@@ -824,6 +824,37 @@ describe Flac2mp3 do
       end
     end
     
+    it 'should convert metadata' do
+      Flac2mp3.should respond_to(:convert_metadata)
+    end
+    
+    describe 'when converting metadata' do
+      before :each do
+        @infile  = 'test.flac'
+        @outfile = 'some.mp3'
+        @flac2mp3 = stub('flac2mp3 object', :convert_metadata => nil)
+        Flac2mp3.stubs(:new).returns(@flac2mp3)
+      end
+      
+      it 'should accept two filenames' do
+        lambda { Flac2mp3.convert_metadata(@infile, @outfile) }.should_not raise_error(ArgumentError)
+      end
+      
+      it 'should require two filenames' do
+        lambda { Flac2mp3.convert_metadata(@infile) }.should raise_error(ArgumentError)
+      end
+      
+      it 'should instantiate a new Flac2mp3 object' do
+        Flac2mp3.expects(:new).returns(@flac2mp3)
+        Flac2mp3.convert_metadata(@infile, @outfile)
+      end
+      
+      it 'should use the Flac2mp3 object to convert the metadata between the given files' do
+        @flac2mp3.expects(:convert_metadata).with(@infile, @outfile)
+        Flac2mp3.convert_metadata(@infile, @outfile)
+      end
+    end
+    
     it 'should provide a tag mapping' do
       Flac2mp3.should respond_to(:tag_mapping)
     end

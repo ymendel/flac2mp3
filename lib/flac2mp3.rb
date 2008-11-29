@@ -113,6 +113,10 @@ class Flac2mp3
       new(options).convert(filename)
     end
     
+    def convert_metadata(infile, outfile)
+      new.convert_metadata(infile, outfile)
+    end
+    
     def tag_mapping
       {
         :album       => :album,
