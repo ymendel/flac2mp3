@@ -1,58 +1,79 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe Flac2mp3 do
-  before :each do
+  before do
     @flac2mp3 = Flac2mp3.new
   end
   
   describe 'when initialized' do
-    before :each do
+    before do
       @options = { :silent => true, :delete => false }
     end
     
     it 'should accept options' do
-      lambda { Flac2mp3.new(@options) }.should_not raise_error(ArgumentError)
+      lambda { Flac2mp3.new(@options) }.should.not.raise(ArgumentError)
     end
     
     it 'should not require options' do
-      lambda { Flac2mp3.new }.should_not raise_error(ArgumentError)
+      lambda { Flac2mp3.new }.should.not.raise(ArgumentError)
     end
     
-    it 'should load the configuration' do
-      Flac2mp3.any_instance.expects(:load_config)
-      Flac2mp3.new
-    end
-    
-    it 'should set the options' do
-      Flac2mp3.any_instance.expects(:set_options).with(@options)
-      Flac2mp3.new(@options)
-    end
-    
-    it 'should default to empty options' do
-      Flac2mp3.any_instance.expects(:set_options).with({})
-      Flac2mp3.new
+    describe do
+      # unnamed describe block just to give a level of organization
+      # to this subclass-based initialize-behavior testing
+      before do
+        @subclass = Class.new(Flac2mp3) do
+          attr_reader :config_loaded, :options_set, :options
+          
+          def load_config
+            @config_loaded = true
+          end
+          
+          def set_options(*args)
+            @options_set = true
+            @options = args
+          end
+        end
+      end
+      
+      it 'should load the configuration' do
+        obj = @subclass.new
+        obj.config_loaded.should == true
+      end
+      
+      it 'should set the options' do
+        obj = @subclass.new(@options)
+        obj.options_set.should == true
+        obj.options.should == [@options]
+      end
+      
+      it 'should default to empty options' do
+        obj = @subclass.new
+        obj.options_set.should == true
+        obj.options.should == [{}]
+      end
     end
   end
   
   it 'should load the configuration' do
-    @flac2mp3.should respond_to(:load_config)
+    @flac2mp3.should.respond_to(:load_config)
   end
   
   describe 'loading the configuration' do
     it 'should look for a config file' do
-      File.expects(:read).with(File.expand_path('~/.flac2mp3')).returns('')
+      File.should.receive(:read).with(File.expand_path('~/.flac2mp3')).and_return('')
       @flac2mp3.load_config
     end
     
     describe 'when a config file is found' do
-      before :each do
+      before do
         @config = { :silent => true, :delete => false }
         @contents = @config.to_yaml
-        File.stubs(:read).returns(@contents)
+        File.stub!(:read).and_return(@contents)
       end
       
       it 'should parse the file as YAML' do
-        YAML.expects(:load).with(@contents)
+        YAML.should.receive(:load).with(@contents)
         @flac2mp3.load_config
       end
       
@@ -62,13 +83,13 @@ describe Flac2mp3 do
       end
       
       it 'should convert string keys to symbols' do
-        File.stubs(:read).returns({ 'silent' => true, 'delete' => false }.to_yaml)
+        File.stub!(:read).and_return({ 'silent' => true, 'delete' => false }.to_yaml)
         @flac2mp3.load_config
         @flac2mp3.config.should == @config
       end
       
       it 'should handle an empty file' do
-        File.stubs(:read).returns('')
+        File.stub!(:read).and_return('')
         @flac2mp3.load_config
         @flac2mp3.config.should == {}
       end
@@ -81,8 +102,8 @@ describe Flac2mp3 do
     end
     
     describe 'when no config file is found' do
-      before :each do
-        File.stubs(:read).raises(Errno::ENOENT)
+      before do
+        File.stub!(:read).and_raise(Errno::ENOENT)
       end
       
       it 'should store an empty config' do
@@ -92,28 +113,28 @@ describe Flac2mp3 do
   end
   
   it 'should set options' do
-    @flac2mp3.should respond_to(:set_options)
+    @flac2mp3.should.respond_to(:set_options)
   end
   
   describe 'setting options' do
-    before :each do
+    before do
       @options = { :silent => true, :delete => false }
     end
     
     it 'should accept options' do
-      lambda { @flac2mp3.set_options(:silent => true) }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.set_options(:silent => true) }.should.not.raise(ArgumentError)
     end
     
     it 'should require options' do
-      lambda { @flac2mp3.set_options }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.set_options }.should.raise(ArgumentError)
     end
     
     it 'should accept a hash of options' do
-      lambda { @flac2mp3.set_options(:silent => true) }.should_not raise_error(TypeError)
+      lambda { @flac2mp3.set_options(:silent => true) }.should.not.raise(TypeError)
     end
     
     it 'should require a hash of options' do
-      lambda { @flac2mp3.set_options('silent') }.should raise_error(TypeError)
+      lambda { @flac2mp3.set_options('silent') }.should.raise(TypeError)
     end
     
     it 'should store the options' do
@@ -129,39 +150,39 @@ describe Flac2mp3 do
   end
   
   describe 'querying options' do
-    before :each do
-      File.stubs(:read).returns('')
+    before do
+      File.stub!(:read).and_return('')
       @flac2mp3.load_config
     end
     
     it 'should indicate the original file should be deleted when a true option is given' do
       @flac2mp3.set_options(:delete => true)
-      @flac2mp3.delete?.should be(true)
+      @flac2mp3.delete?.should == true
     end
     
     it 'should indicate the original file should not be deleted when a false option is given' do
       @flac2mp3.set_options(:delete => false)
-      @flac2mp3.delete?.should be(false)
+      @flac2mp3.delete?.should == false
     end
     
     it 'should indicate the original file should not be deleted when no option is given' do
       @flac2mp3.set_options({})
-      @flac2mp3.delete?.should be(false)
+      @flac2mp3.delete?.should == false
     end
     
     it 'should indicate the conversion should be silent when a true option is given' do
       @flac2mp3.set_options(:silent => true)
-      @flac2mp3.silent?.should be(true)
+      @flac2mp3.silent?.should == true
     end
     
     it 'should indicate the conversion should not be silent when a false option is given' do
       @flac2mp3.set_options(:silent => false)
-      @flac2mp3.silent?.should be(false)
+      @flac2mp3.silent?.should == false
     end
     
     it 'should indicate the conversion should not be silent when no option is given' do
       @flac2mp3.set_options({})
-      @flac2mp3.silent?.should be(false)
+      @flac2mp3.silent?.should == false
     end
     
     it 'should store the given encoding' do
@@ -177,150 +198,151 @@ describe Flac2mp3 do
     
     it 'should use values from the configuration' do
       config = {:silent => true}
-      File.stubs(:read).returns(config.to_yaml)
-      Flac2mp3.new.silent?.should be(true)
+      File.stub!(:read).and_return(config.to_yaml)
+      Flac2mp3.new.silent?.should == true
     end
     
     it 'should override configuration values with options' do
       config = {:silent => true}
-      File.stubs(:read).returns(config.to_yaml)
-      Flac2mp3.new(:silent => false).silent?.should be(false)
+      File.stub!(:read).and_return(config.to_yaml)
+      Flac2mp3.new(:silent => false).silent?.should == false
     end
     
     it 'should combine configuration and option values' do
       config = {:silent => true}
-      File.stubs(:read).returns(config.to_yaml)
+      File.stub!(:read).and_return(config.to_yaml)
       flac2mp3 = Flac2mp3.new(:delete => true)
       
-      flac2mp3.silent?.should be(true)
-      flac2mp3.delete?.should be(true)
+      flac2mp3.silent?.should == true
+      flac2mp3.delete?.should == true
     end
   end
   
   it 'should convert' do
-    @flac2mp3.should respond_to(:convert)
+    @flac2mp3.should.respond_to(:convert)
   end
   
   describe 'when converting' do
-    before :each do
+    before do
       @filename = 'test.flac'
-      @flac2mp3.stubs(:process_conversion)
+      @flac2mp3.stub!(:process_conversion)
+      FileTest.stub!(:file?).and_return(true)
     end
     
     it 'should accept a filename' do
-      lambda { @flac2mp3.convert(@filename) }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.convert(@filename) }.should.not.raise(ArgumentError)
     end
     
     it 'should require a filename' do
-      lambda { @flac2mp3.convert }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.convert }.should.raise(ArgumentError)
     end
     
     it 'should check if the filename belongs to a regular file' do
-      FileTest.expects(:file?).with(@filename).returns(true)
+      FileTest.should.receive(:file?).with(@filename).and_return(true)
       @flac2mp3.convert(@filename)
     end
     
     describe 'when given a filename belonging to a regular file' do
-      before :each do
-        FileTest.stubs(:file?).returns(true)
+      before do
+        FileTest.stub!(:file?).and_return(true)
       end
       
       it 'should not error' do
-        lambda { @flac2mp3.convert(@filename) }.should_not raise_error(TypeError)
+        lambda { @flac2mp3.convert(@filename) }.should.not.raise(TypeError)
       end
             
       it 'should process the conversion' do
-        @flac2mp3.expects(:process_conversion).with(@filename)
+        @flac2mp3.should.receive(:process_conversion).with(@filename)
         @flac2mp3.convert(@filename)
       end
       
       it 'should check if the original file should be deleted' do
-        @flac2mp3.expects(:delete?)
+        @flac2mp3.should.receive(:delete?)
         @flac2mp3.convert(@filename)
       end
       
       describe 'when the original file should be deleted' do
-        before :each do
-          @flac2mp3.stubs(:delete?).returns(true)
+        before do
+          @flac2mp3.stub!(:delete?).and_return(true)
         end
         
         it 'should delete the original file' do
-          File.expects(:delete).with(@filename)
+          File.should.receive(:delete).with(@filename)
           @flac2mp3.convert(@filename)
         end
       end
       
       describe 'when the original file should not be deleted' do
-        before :each do
-          @flac2mp3.stubs(:delete?).returns(false)
+        before do
+          @flac2mp3.stub!(:delete?).and_return(false)
         end
         
         it 'should not delete the original file' do
-          File.expects(:delete).never
+          File.should.receive(:delete).never
           @flac2mp3.convert(@filename)
         end
       end
     end
     
     describe 'when given a filename not belonging to a regular file' do
-      before :each do
-        FileTest.stubs(:file?).returns(false)
+      before do
+        FileTest.stub!(:file?).and_return(false)
       end
       
       it 'should error' do
-        lambda { @flac2mp3.convert(@filename) }.should raise_error(TypeError)
+        lambda { @flac2mp3.convert(@filename) }.should.raise(TypeError)
       end
     end
   end
   
   it 'should process conversion' do
-    @flac2mp3.should respond_to(:process_conversion)
+    @flac2mp3.should.respond_to(:process_conversion)
   end
   
   describe 'when processing conversion' do
-    before :each do
+    before do
       @filename     = 'test.flac'
       @out_filename = 'test.mp3'
-      @flac2mp3.stubs(:output_filename).returns(@out_filename)
-      @flac2mp3.stubs(:convert_data)
-      @flac2mp3.stubs(:convert_metadata)
+      @flac2mp3.stub!(:output_filename).and_return(@out_filename)
+      @flac2mp3.stub!(:convert_data)
+      @flac2mp3.stub!(:convert_metadata)
     end
     
     it 'should accept a filename' do
-      lambda { @flac2mp3.process_conversion(@filename) }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.process_conversion(@filename) }.should.not.raise(ArgumentError)
     end
     
     it 'should require a filename' do
-      lambda { @flac2mp3.process_conversion }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.process_conversion }.should.raise(ArgumentError)
     end
     
     it 'get the output filename from the given filename' do
-      @flac2mp3.expects(:output_filename).with(@filename)
+      @flac2mp3.should.receive(:output_filename).with(@filename)
       @flac2mp3.process_conversion(@filename)
     end
     
     it 'should convert data' do
-      @flac2mp3.expects(:convert_data).with(@filename, @out_filename)
+      @flac2mp3.should.receive(:convert_data).with(@filename, @out_filename)
       @flac2mp3.process_conversion(@filename)
     end
     
     it 'should convert metadata' do
-      @flac2mp3.expects(:convert_metadata).with(@filename, @out_filename)
+      @flac2mp3.should.receive(:convert_metadata).with(@filename, @out_filename)
       @flac2mp3.process_conversion(@filename)
     end
   end
   
   it 'should provide an output filename' do
-    @flac2mp3.should respond_to(:output_filename)
+    @flac2mp3.should.respond_to(:output_filename)
   end
   
   describe 'providing an output filename' do
     it 'should accept a filename' do
-      lambda { @flac2mp3.output_filename('blah.flac') }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.output_filename('blah.flac') }.should.not.raise(ArgumentError)
     end
 
     it 'should require a filename' do
-      lambda { @flac2mp3.output_filename }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.output_filename }.should.raise(ArgumentError)
     end
 
     it 'should convert a .flac extension to an .mp3 extension' do
@@ -333,81 +355,81 @@ describe Flac2mp3 do
   end
   
   it 'should convert data' do
-    @flac2mp3.should respond_to(:convert_data)
+    @flac2mp3.should.respond_to(:convert_data)
   end
   
   describe 'when converting data' do
-    before :each do
+    before do
       @filename     = 'test.flac'
       @out_filename = 'test.mp3'
       @flac_command = 'flac command'
       @mp3_command  = 'mp3 command'
-      @flac2mp3.stubs(:flac_command).returns(@flac_command)
-      @flac2mp3.stubs(:mp3_command).returns(@mp3_command)
-      @flac2mp3.stubs(:system)
+      @flac2mp3.stub!(:flac_command).and_return(@flac_command)
+      @flac2mp3.stub!(:mp3_command).and_return(@mp3_command)
+      @flac2mp3.stub!(:system)
     end
     
     it 'should accept a filename and an output filename' do
-      lambda { @flac2mp3.convert_data(@filename, @out_filename) }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.convert_data(@filename, @out_filename) }.should.not.raise(ArgumentError)
     end
     
     it 'should require an output filename' do
-      lambda { @flac2mp3.convert_data(@filename) }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.convert_data(@filename) }.should.raise(ArgumentError)
     end
     
     it 'should require a filename' do
-      lambda { @flac2mp3.convert_data }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.convert_data }.should.raise(ArgumentError)
     end
     
     it 'should call the flac command with the given filename' do
-      @flac2mp3.expects(:flac_command).with(@filename)
+      @flac2mp3.should.receive(:flac_command).with(@filename)
       @flac2mp3.convert_data(@filename, @out_filename)
     end
     
     it 'should call the mp3 command with the given output filename' do
-      @flac2mp3.expects(:mp3_command).with(@out_filename)
+      @flac2mp3.should.receive(:mp3_command).with(@out_filename)
       @flac2mp3.convert_data(@filename, @out_filename)
     end
     
     it 'should shell out to the system with the flac and mp3 commands' do
-      @flac2mp3.expects(:system).with("#{@flac_command} | #{@mp3_command}")
+      @flac2mp3.should.receive(:system).with("#{@flac_command} | #{@mp3_command}")
       @flac2mp3.convert_data(@filename, @out_filename)
     end
   end
   
   it 'should provide a flac command' do
-    @flac2mp3.should respond_to(:flac_command)
+    @flac2mp3.should.respond_to(:flac_command)
   end
   
   describe 'when providing a flac command' do
-    before :each do
+    before do
       @filename = 'test.flac'
       @safe_filename = 'safetest.safeflac'
-      @flac2mp3.stubs(:safequote).returns(@safe_filename)
-      @flac2mp3.stubs(:silent?)
+      @flac2mp3.stub!(:safequote).and_return(@safe_filename)
+      @flac2mp3.stub!(:silent?)
     end
     
     it 'should accept a filename' do
-      lambda { @flac2mp3.flac_command(@filename) }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.flac_command(@filename) }.should.not.raise(ArgumentError)
     end
     
     it 'should require a filename' do
-      lambda { @flac2mp3.flac_command }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.flac_command }.should.raise(ArgumentError)
     end
     
     it 'should safequote the filename' do
-      @flac2mp3.expects(:safequote).with(@filename)
+      @flac2mp3.should.receive(:safequote).with(@filename)
       @flac2mp3.flac_command(@filename)
     end
     
     it 'should check if the command should be silent' do
-      @flac2mp3.expects(:silent?)
+      @flac2mp3.should.receive(:silent?)
       @flac2mp3.flac_command(@filename)
     end
     
     describe 'when the command should be silent' do
-      before :each do
-        @flac2mp3.stubs(:silent?).returns(true)
+      before do
+        @flac2mp3.stub!(:silent?).and_return(true)
       end
       
       it 'should provide a flac shell command that will be silent' do
@@ -416,8 +438,8 @@ describe Flac2mp3 do
     end
     
     describe 'when the command should not be silent' do
-      before :each do
-        @flac2mp3.stubs(:silent?).returns(false)
+      before do
+        @flac2mp3.stub!(:silent?).and_return(false)
       end
       
       it 'should provide a flac shell command that will not be silent' do
@@ -427,45 +449,45 @@ describe Flac2mp3 do
   end
   
   it 'should provide an mp3 command' do
-    @flac2mp3.should respond_to(:mp3_command)
+    @flac2mp3.should.respond_to(:mp3_command)
   end
   
   describe 'when providing an mp3 command' do
-    before :each do
+    before do
       @filename = 'test.mp3'
       @safe_filename = 'safetest.safemp3'
-      @flac2mp3.stubs(:safequote).returns(@safe_filename)
-      @flac2mp3.stubs(:silent?)
+      @flac2mp3.stub!(:safequote).and_return(@safe_filename)
+      @flac2mp3.stub!(:silent?)
       @encoding = '--VAWESOME'
-      @flac2mp3.stubs(:encoding).returns(@encoding)
+      @flac2mp3.stub!(:encoding).and_return(@encoding)
     end
     
     it 'should accept a filename' do
-      lambda { @flac2mp3.mp3_command(@filename) }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.mp3_command(@filename) }.should.not.raise(ArgumentError)
     end
     
     it 'should require a filename' do
-      lambda { @flac2mp3.mp3_command }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.mp3_command }.should.raise(ArgumentError)
     end
     
     it 'should safequote the filename' do
-      @flac2mp3.expects(:safequote).with(@filename)
+      @flac2mp3.should.receive(:safequote).with(@filename)
       @flac2mp3.mp3_command(@filename)
     end
     
     it 'should check if the command should be silent' do
-      @flac2mp3.expects(:silent?)
+      @flac2mp3.should.receive(:silent?)
       @flac2mp3.mp3_command(@filename)
     end
     
     it 'should check the encoding to use' do
-      @flac2mp3.expects(:encoding)
+      @flac2mp3.should.receive(:encoding)
       @flac2mp3.mp3_command(@filename)
     end
     
     describe 'when the command should be silent' do
-      before :each do
-        @flac2mp3.stubs(:silent?).returns(true)
+      before do
+        @flac2mp3.stub!(:silent?).and_return(true)
       end
       
       it 'should provide an mp3 shell command that will be silent' do
@@ -474,8 +496,8 @@ describe Flac2mp3 do
     end
     
     describe 'when the command should not be silent' do
-      before :each do
-        @flac2mp3.stubs(:silent?).returns(false)
+      before do
+        @flac2mp3.stub!(:silent?).and_return(false)
       end
       
       it 'should provide an mp3 shell command that will not be silent' do
@@ -485,16 +507,16 @@ describe Flac2mp3 do
   end
   
   it 'should quote filenames safely' do
-    @flac2mp3.should respond_to(:safequote)
+    @flac2mp3.should.respond_to(:safequote)
   end
   
   describe 'when quoting a filename safely' do
     it 'should accept a filename' do
-      lambda { @flac2mp3.safequote('test.flac') }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.safequote('test.flac') }.should.not.raise(ArgumentError)
     end
     
     it 'should require a filename' do
-      lambda { @flac2mp3.safequote }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.safequote }.should.raise(ArgumentError)
     end
     
     it 'should leave alphanumeric characters alone' do
@@ -507,68 +529,68 @@ describe Flac2mp3 do
   end
   
   it 'should convert metadata' do
-    @flac2mp3.should respond_to(:convert_metadata)
+    @flac2mp3.should.respond_to(:convert_metadata)
   end
   
   describe 'when converting metadata' do
-    before :each do
+    before do
       @filename     = 'test.flac'
       @out_filename = 'test.mp3'
-      @flacdata = stub('flacdata')
-      @flac2mp3.stubs(:get_flacdata).returns(@flacdata)
-      @flac2mp3.stubs(:set_mp3data)
+      @flacdata = mock('flac data')
+      @flac2mp3.stub!(:get_flacdata).and_return(@flacdata)
+      @flac2mp3.stub!(:set_mp3data)
     end
     
     it 'should accept a filename and an output filename' do
-      lambda { @flac2mp3.convert_metadata(@filename, @out_filename) }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.convert_metadata(@filename, @out_filename) }.should.not.raise(ArgumentError)
     end
     
     it 'should require an output filename' do
-      lambda { @flac2mp3.convert_metadata(@filename) }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.convert_metadata(@filename) }.should.raise(ArgumentError)
     end
     
     it 'should require a filename' do
-      lambda { @flac2mp3.convert_metadata }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.convert_metadata }.should.raise(ArgumentError)
     end
     
     it 'should get the flac metadata' do
-      @flac2mp3.expects(:get_flacdata).with(@filename)
+      @flac2mp3.should.receive(:get_flacdata).with(@filename)
       @flac2mp3.convert_metadata(@filename, @out_filename)
     end
     
     it 'should set the mp3 metadata with the flac metadata' do
-      @flac2mp3.expects(:set_mp3data).with(@out_filename, @flacdata)
+      @flac2mp3.should.receive(:set_mp3data).with(@out_filename, @flacdata)
       @flac2mp3.convert_metadata(@filename, @out_filename)
     end
   end
   
   it 'should get flac metadata' do
-    @flac2mp3.should respond_to(:get_flacdata)
+    @flac2mp3.should.respond_to(:get_flacdata)
   end
   
   describe 'when getting flac metadata' do
-    before :each do
+    before do
       @filename = 'test.flac'
       @tags = {}
-      @flacinfo = stub('flacinfo', :tags => @tags)
-      FlacInfo.stubs(:new).returns(@flacinfo)
+      @flacinfo = mock('flac info', :tags => @tags)
+      FlacInfo.stub!(:new).and_return(@flacinfo)
     end
     
     it 'should accept a filename' do
-      lambda { @flac2mp3.get_flacdata(@filename) }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.get_flacdata(@filename) }.should.not.raise(ArgumentError)
     end
     
     it 'should require a filename' do
-      lambda { @flac2mp3.get_flacdata }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.get_flacdata }.should.raise(ArgumentError)
     end
     
     it 'should create a FlacInfo object' do
-      FlacInfo.expects(:new).with(@filename).returns(@flacinfo)
+      FlacInfo.should.receive(:new).with(@filename).and_return(@flacinfo)
       @flac2mp3.get_flacdata(@filename)
     end
 
     it 'should use the FlacInfo object tags' do
-      @flacinfo.expects(:tags).returns(@tags)
+      @flacinfo.should.receive(:tags).and_return(@tags)
       @flac2mp3.get_flacdata(@filename)
     end
     
@@ -593,9 +615,9 @@ describe Flac2mp3 do
       data[:blah].should == 'boo'
       data[:comment].should == 'hey'
 
-      data.should_not have_key('artist')
-      data.should_not have_key('blah')
-      data.should_not have_key('comment')
+      data.should.not.include('artist')
+      data.should.not.include('blah')
+      data.should.not.include('comment')
     end
     
     it 'should convert tags to lowercase' do
@@ -608,9 +630,9 @@ describe Flac2mp3 do
       data[:blah].should == 'boo'
       data[:comment].should == 'hey'
 
-      data.should_not have_key('Artist')
-      data.should_not have_key(:BLAH)
-      data.should_not have_key('cOmMeNt')
+      data.should.not.include('Artist')
+      data.should.not.include(:BLAH)
+      data.should.not.include('cOmMeNt')
     end
     
     it 'should convert values consisting only of digits to actual numbers' do
@@ -657,41 +679,41 @@ describe Flac2mp3 do
   end
   
   it 'should set mp3 metadata' do
-    @flac2mp3.should respond_to(:set_mp3data)
+    @flac2mp3.should.respond_to(:set_mp3data)
   end
   
   describe 'when setting mp3 metadata' do
-    before :each do
+    before do
       @filename = 'test.mp3'
       @tags = {}
-      @mp3tags  = stub('mp3info tags')
-      @mp3tags2 = stub('mp3info tags 2')
-      @mp3info  = stub('mp3info obj', :tag => @mp3tags, :tag2 => @mp3tags2)
-      Mp3Info.stubs(:open).yields(@mp3info)
+      @mp3tags  = mock('mp3 tags')
+      @mp3tags2 = mock('mp3 tags 2')
+      @mp3info  = mock('mp3 info', :tag => @mp3tags, :tag2 => @mp3tags2)
+      Mp3Info.stub!(:open).and_yield(@mp3info)
     end
     
     it 'should accept a filename and tag data' do
-      lambda { @flac2mp3.set_mp3data(@filename, 'tag data') }.should_not raise_error(ArgumentError)
+      lambda { @flac2mp3.set_mp3data(@filename, {}) }.should.not.raise(ArgumentError)
     end
     
     it 'should require tag data' do
-      lambda { @flac2mp3.set_mp3data(@filename) }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.set_mp3data(@filename) }.should.raise(ArgumentError)
     end
     
     it 'should require a filename' do
-      lambda { @flac2mp3.set_mp3data }.should raise_error(ArgumentError)
+      lambda { @flac2mp3.set_mp3data }.should.raise(ArgumentError)
     end
     
     it 'should accept a hash of tag data' do
-      lambda { @flac2mp3.set_mp3data(@filename, 'tag data') }.should raise_error(TypeError)
+      lambda { @flac2mp3.set_mp3data(@filename, 'tag data') }.should.raise(TypeError)
     end
     
     it 'should require a hash of tag data' do
-      lambda { @flac2mp3.set_mp3data(@filename, {}) }.should_not raise_error(TypeError)
+      lambda { @flac2mp3.set_mp3data(@filename, {}) }.should.not.raise(TypeError)
     end
     
     it 'should use an Mp3Info object' do
-      Mp3Info.expects(:open).with(@filename)
+      Mp3Info.should.receive(:open).with(@filename)
       @flac2mp3.set_mp3data(@filename, @tags)
     end
     
@@ -700,9 +722,9 @@ describe Flac2mp3 do
       @tags[:artist] = 'boo'
       @tags[:genre] = 'bang'
 
-      @mp3tags.expects(:album=).with(@tags[:album])
-      @mp3tags.expects(:artist=).with(@tags[:artist])
-      @mp3tags.expects(:genre_s=).with(@tags[:genre])
+      @mp3tags.should.receive(:album=).with(@tags[:album])
+      @mp3tags.should.receive(:artist=).with(@tags[:artist])
+      @mp3tags.should.receive(:genre_s=).with(@tags[:genre])
 
       @flac2mp3.set_mp3data(@filename, @tags)
     end
@@ -712,12 +734,12 @@ describe Flac2mp3 do
       @tags[:artist] = 'boo'
       @tags[:genre] = 'bang'
 
-      @mp3tags.stubs(:album=)
-      @mp3tags.stubs(:artist=)
-      @mp3tags.stubs(:genre_s=)
+      @mp3tags.stub!(:album=)
+      @mp3tags.stub!(:artist=)
+      @mp3tags.stub!(:genre_s=)
 
-      @mp3tags.expects(:comments=).never
-      @mp3tags.expects(:year=).never
+      @mp3tags.should.receive(:comments=).never
+      @mp3tags.should.receive(:year=).never
 
       @flac2mp3.set_mp3data(@filename, @tags)
     end
@@ -726,8 +748,8 @@ describe Flac2mp3 do
       @tags[:blah] = 'blah'
       @tags[:bang] = 'bang'
 
-      @mp3tags.expects(:blah=).never
-      @mp3tags.expects(:bang=).never
+      @mp3tags.should.receive(:blah=).never
+      @mp3tags.should.receive(:bang=).never
 
       @flac2mp3.set_mp3data(@filename, @tags)
     end
@@ -735,7 +757,7 @@ describe Flac2mp3 do
     it 'should use tag2 for bpm' do
       @tags[:bpm] = '5'
 
-      @mp3tags2.expects(:TBPM=).with(@tags[:bpm])
+      @mp3tags2.should.receive(:TBPM=).with(@tags[:bpm])
 
       @flac2mp3.set_mp3data(@filename, @tags)
     end
@@ -743,7 +765,7 @@ describe Flac2mp3 do
     it 'should use tag2 for composer' do
       @tags[:composer] = 'Il Maestro'
 
-      @mp3tags2.expects(:TCOM=).with(@tags[:composer])
+      @mp3tags2.should.receive(:TCOM=).with(@tags[:composer])
 
       @flac2mp3.set_mp3data(@filename, @tags)
     end
@@ -751,7 +773,7 @@ describe Flac2mp3 do
     it 'should use tag2 for compilation' do
       @tags[:compilation] = '1'
 
-      @mp3tags2.expects(:TCMP=).with(@tags[:compilation])
+      @mp3tags2.should.receive(:TCMP=).with(@tags[:compilation])
 
       @flac2mp3.set_mp3data(@filename, @tags)
     end
@@ -759,7 +781,7 @@ describe Flac2mp3 do
     it "should use tag2 for 'tag' ('grouping')" do
       @tags[:tag] = 'one, two, three, oclock'
 
-      @mp3tags2.expects(:TIT1=).with(@tags[:tag])
+      @mp3tags2.should.receive(:TIT1=).with(@tags[:tag])
 
       @flac2mp3.set_mp3data(@filename, @tags)
     end
@@ -768,7 +790,7 @@ describe Flac2mp3 do
       @tags[:tracknumber] = 4
       @tags[:tracktotal]  = 15
 
-      @mp3tags2.expects(:TRCK=).with('4/15')
+      @mp3tags2.should.receive(:TRCK=).with('4/15')
 
       @flac2mp3.set_mp3data(@filename, @tags)
     end
@@ -777,7 +799,7 @@ describe Flac2mp3 do
       @tags[:discnumber] = 1
       @tags[:disctotal]  = 2
 
-      @mp3tags2.expects(:TPOS=).with('1/2')
+      @mp3tags2.should.receive(:TPOS=).with('1/2')
 
       @flac2mp3.set_mp3data(@filename, @tags)
     end
@@ -785,83 +807,83 @@ describe Flac2mp3 do
   
   describe 'as a class' do
     it 'should convert' do
-      Flac2mp3.should respond_to(:convert)
+      Flac2mp3.should.respond_to(:convert)
     end
     
     describe 'when converting' do
-      before :each do
+      before do
         @filename = 'test.flac'
         @options  = { :silent => true, :delete => false, :fish => :flat }
-        @flac2mp3 = stub('flac2mp3 object', :convert => nil)
-        Flac2mp3.stubs(:new).returns(@flac2mp3)
+        @flac2mp3 = mock('flac2mp3', :convert => nil)
+        Flac2mp3.stub!(:new).and_return(@flac2mp3)
       end
       
       it 'should accept a filename and a hash of options' do
-        lambda { Flac2mp3.convert(@filename, @options) }.should_not raise_error(ArgumentError)
+        lambda { Flac2mp3.convert(@filename, @options) }.should.not.raise(ArgumentError)
       end
       
       it 'should not require options' do
-        lambda { Flac2mp3.convert(@filename) }.should_not raise_error(ArgumentError)
+        lambda { Flac2mp3.convert(@filename) }.should.not.raise(ArgumentError)
       end
       
       it 'should require a filename' do
-        lambda { Flac2mp3.convert }.should raise_error(ArgumentError)
+        lambda { Flac2mp3.convert }.should.raise(ArgumentError)
       end
       
       it 'should instantiate a new Flac2mp3 object' do
-        Flac2mp3.expects(:new).returns(@flac2mp3)
+        Flac2mp3.should.receive(:new).and_return(@flac2mp3)
         Flac2mp3.convert(@filename)
       end
       
       it 'should pass the options when instantiating the Flac2mp3 object' do
-        Flac2mp3.expects(:new).with(@options).returns(@flac2mp3)
+        Flac2mp3.should.receive(:new).with(@options).and_return(@flac2mp3)
         Flac2mp3.convert(@filename, @options)
       end
       
       it 'should use the Flac2mp3 object to convert the given file' do
-        @flac2mp3.expects(:convert).with(@filename)
+        @flac2mp3.should.receive(:convert).with(@filename)
         Flac2mp3.convert(@filename)
       end
     end
     
     it 'should convert metadata' do
-      Flac2mp3.should respond_to(:convert_metadata)
+      Flac2mp3.should.respond_to(:convert_metadata)
     end
     
     describe 'when converting metadata' do
-      before :each do
+      before do
         @infile  = 'test.flac'
         @outfile = 'some.mp3'
-        @flac2mp3 = stub('flac2mp3 object', :convert_metadata => nil)
-        Flac2mp3.stubs(:new).returns(@flac2mp3)
+        @flac2mp3 = mock('flac2mp3', :convert_metadata => nil)
+        Flac2mp3.stub!(:new).and_return(@flac2mp3)
       end
       
       it 'should accept two filenames' do
-        lambda { Flac2mp3.convert_metadata(@infile, @outfile) }.should_not raise_error(ArgumentError)
+        lambda { Flac2mp3.convert_metadata(@infile, @outfile) }.should.not.raise(ArgumentError)
       end
       
       it 'should require two filenames' do
-        lambda { Flac2mp3.convert_metadata(@infile) }.should raise_error(ArgumentError)
+        lambda { Flac2mp3.convert_metadata(@infile) }.should.raise(ArgumentError)
       end
       
       it 'should instantiate a new Flac2mp3 object' do
-        Flac2mp3.expects(:new).returns(@flac2mp3)
+        Flac2mp3.should.receive(:new).and_return(@flac2mp3)
         Flac2mp3.convert_metadata(@infile, @outfile)
       end
       
       it 'should use the Flac2mp3 object to convert the metadata between the given files' do
-        @flac2mp3.expects(:convert_metadata).with(@infile, @outfile)
+        @flac2mp3.should.receive(:convert_metadata).with(@infile, @outfile)
         Flac2mp3.convert_metadata(@infile, @outfile)
       end
     end
     
     it 'should provide a tag mapping' do
-      Flac2mp3.should respond_to(:tag_mapping)
+      Flac2mp3.should.respond_to(:tag_mapping)
     end
     
     describe 'providing a tag mapping' do
       it 'should return a hash' do
-        Flac2mp3.tag_mapping.should be_kind_of(Hash)
+        Flac2mp3.tag_mapping.should.be.kind_of(Hash)
       end
 
       it "should map 'album' to 'album'" do
