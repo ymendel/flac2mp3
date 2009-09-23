@@ -1,3 +1,10 @@
+== 0.4.0 2009-09-22
+
+* 1 enhancement:
+  * Converting UTF-8 FLAC tag data to ISO-8859-1 MP3 data for good iTunes display
+* 1 change:
+  * Switched tests from rspec/mocha to bacon/facon
+
 == 0.3.2 2008-11-29
 
 * 3 enhancements:
