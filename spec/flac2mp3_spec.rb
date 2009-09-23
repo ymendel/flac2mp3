@@ -676,6 +676,35 @@ describe Flac2mp3 do
       data = @flac2mp3.get_flacdata(@filename)
       data[:description].should == '1938'
     end
+    
+    # iTunes wants ISO-8859-1, and I want my MP3s to display well in iTunes
+    it 'should convert UTF-8 titles to ISO-8859-1' do
+      @tags[:title] = "L\303\251gende"
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:title].should == "L\351gende"
+    end
+    
+    it 'should convert UTF-8 titles to ISO-8859-1 even if the title key is not a simple downcased symbol' do
+      @tags['TITLE'] = "L\303\251gende"
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:title].should == "L\351gende"
+    end
+    
+    it 'should convert UTF-8 artist names to ISO-8859-1' do
+      @tags[:artist] = "St\303\251phane Grappelli"
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:artist].should == "St\351phane Grappelli"
+    end
+    
+    it 'should convert UTF-8 artist names to ISO-8859-1 even if the artist key is not a simple downcased symbol' do
+      @tags['ARTIST'] = "St\303\251phane Grappelli"
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:artist].should == "St\351phane Grappelli"
+    end
   end
   
   it 'should set mp3 metadata' do
