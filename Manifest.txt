@@ -19,5 +19,4 @@ spec/metaflac2mp3_command_spec.rb
 spec/spec_helper.rb
 tasks/deployment.rake
 tasks/environment.rake
-tasks/rspec.rake
 tasks/website.rake
