@@ -65,13 +65,10 @@ class Flac2mp3
   end
   
   def load_config
-    yaml = YAML.load(File.read(File.expand_path('~/.flac2mp3'))) || {}
-    @config = yaml.inject({}) do |hash, (key, value)|
-      hash[key.to_sym] = value
-      hash
-    end
-  rescue Errno::ENOENT
     @config = {}
+    yaml = YAML.load(File.read(File.expand_path('~/.flac2mp3'))) || {}
+    yaml.each { |k, v|  @config[k.to_sym] = v }
+  rescue Errno::ENOENT
   end
   
   def set_options(options)
