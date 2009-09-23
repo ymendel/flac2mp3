@@ -16,7 +16,6 @@ setup.rb
 spec/flac2mp3_command_spec.rb
 spec/flac2mp3_spec.rb
 spec/metaflac2mp3_command_spec.rb
-spec/spec.opts
 spec/spec_helper.rb
 tasks/deployment.rake
 tasks/environment.rake
