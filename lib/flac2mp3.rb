@@ -5,7 +5,6 @@ require 'yaml'
 
 class Flac2mp3
   def initialize(options = {})
-    @config = {}
     load_config
     set_options(options)
   end
