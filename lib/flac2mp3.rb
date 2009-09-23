@@ -49,7 +49,7 @@ class Flac2mp3
       key = key.to_s.downcase.to_sym
       value = value.to_i if value.respond_to?(:match) and value.match(/^\d+$/)
       value = value.to_s if self.class.string_fields.include?(key)
-      value = Iconv.conv('ISO-8859-1', 'UTF-8', value) if value.is_a?(String)
+      value = Iconv.conv('ISO-8859-1//TRANSLIT', 'UTF-8', value) if value.is_a?(String)
       
       hash[key] = value
       hash

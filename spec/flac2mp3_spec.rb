@@ -705,6 +705,20 @@ describe Flac2mp3 do
       data = @flac2mp3.get_flacdata(@filename)
       data[:artist].should == "St\351phane Grappelli"
     end
+    
+    it 'should convert UTF-8 album titles to ISO-8859-1' do
+      @tags[:album] = "Still on Top \342\200\224 The Greatest Hits"
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:album].should == "Still on Top - The Greatest Hits"  # not a strict conversion, but a transliteration
+    end
+    
+    it 'should convert UTF-8 album titles to ISO-8859-1 even if the album key is not a simple downcased symbol' do
+      @tags['ALBUM'] = "Still on Top \342\200\224 The Greatest Hits"
+
+      data = @flac2mp3.get_flacdata(@filename)
+      data[:album].should == "Still on Top - The Greatest Hits"  # not a strict conversion, but a transliteration
+    end
   end
   
   it 'should set mp3 metadata' do
