@@ -2,7 +2,6 @@ $:.unshift File.dirname(__FILE__)
 require 'flacinfo'
 require 'mp3info'
 require 'yaml'
-require 'iconv'
 
 class Flac2mp3
   def initialize(options = {})
@@ -49,7 +48,7 @@ class Flac2mp3
       key = key.to_s.downcase.to_sym
       value = value.to_i if value.respond_to?(:match) and value.match(/^\d+$/)
       value = value.to_s if self.class.string_fields.include?(key)
-      value = Iconv.conv('ISO-8859-1//TRANSLIT', 'UTF-8', value) if value.is_a?(String)
+      value = value.force_encoding('UTF-8') if value.is_a?(String)
 
       hash[key] = value
       hash
