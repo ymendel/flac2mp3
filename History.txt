@@ -22,7 +22,7 @@
 * 2 enhancements:
   * Now has a configuration file, ~/.flac2mp3, where options can be stored.
     Options given on the command-line override any configuration options.
-	* Greatly refactored internals, though the command-line operation remains the same.
+  * Greatly refactored internals, though the command-line operation remains the same.
 
 == 0.2.8 2008-07-21
 
@@ -43,7 +43,7 @@
 
 * 1 bug fix:
   * Composer now actually carried over from FLAC to MP3 tags, not just thought to be.
-  
+
 * 3 enhancements:
   * Compilation flag carried over.
   * Track total carried over in addition to track number.
