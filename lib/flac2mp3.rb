@@ -44,15 +44,18 @@ class Flac2mp3
   end
 
   def get_flacdata(filename)
-    FlacInfo.new(filename).tags.inject({}) do |hash, (key, value)|
+    hash = {}
+
+    FlacInfo.new(filename).tags.each do |(key, value)|
       key = key.to_s.downcase.to_sym
       value = value.to_i if value.respond_to?(:match) and value.match(/^\d+$/)
       value = value.to_s if self.class.string_fields.include?(key)
       value = value.force_encoding('UTF-8') if value.is_a?(String)
 
       hash[key] = value
-      hash
     end
+
+    hash
   end
 
   def set_mp3data(filename, tags)
