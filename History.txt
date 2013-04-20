@@ -1,3 +1,8 @@
+== 0.4.1 2013-04-20
+
+* 1 tiny enhancement:
+  * Switched from iconv to built-in encoding
+
 == 0.4.0 2009-09-22
 
 * 1 enhancement:
