@@ -678,46 +678,46 @@ describe Flac2mp3 do
     end
 
     # iTunes wants ISO-8859-1, and I want my MP3s to display well in iTunes
-    it 'should convert UTF-8 titles to ISO-8859-1' do
+    it 'should result in ISO-8859-1 titles' do
       @tags[:title] = "L\303\251gende"
 
       data = @flac2mp3.get_flacdata(@filename)
-      data[:title].should == "L\351gende"
+      data[:title].should == "L\351gende".force_encoding('ISO-8859-1')
     end
 
-    it 'should convert UTF-8 titles to ISO-8859-1 even if the title key is not a simple downcased symbol' do
+    it 'should result in ISO-8859-1 titles even if the title key is not a simple downcased symbol' do
       @tags['TITLE'] = "L\303\251gende"
 
       data = @flac2mp3.get_flacdata(@filename)
-      data[:title].should == "L\351gende"
+      data[:title].should == "L\351gende".force_encoding('ISO-8859-1')
     end
 
-    it 'should convert UTF-8 artist names to ISO-8859-1' do
+    it 'should result in ISO-8859-1 artist names' do
       @tags[:artist] = "St\303\251phane Grappelli"
 
       data = @flac2mp3.get_flacdata(@filename)
-      data[:artist].should == "St\351phane Grappelli"
+      data[:artist].should == "St\351phane Grappelli".force_encoding('ISO-8859-1')
     end
 
-    it 'should convert UTF-8 artist names to ISO-8859-1 even if the artist key is not a simple downcased symbol' do
+    it 'should result in ISO-8859-1 artist names even if the artist key is not a simple downcased symbol' do
       @tags['ARTIST'] = "St\303\251phane Grappelli"
 
       data = @flac2mp3.get_flacdata(@filename)
-      data[:artist].should == "St\351phane Grappelli"
+      data[:artist].should == "St\351phane Grappelli".force_encoding('ISO-8859-1')
     end
 
-    it 'should convert UTF-8 album titles to ISO-8859-1' do
+    it 'should result in ISO-8859-1 album titles' do
       @tags[:album] = "Still on Top \342\200\224 The Greatest Hits"
 
       data = @flac2mp3.get_flacdata(@filename)
-      data[:album].should == "Still on Top - The Greatest Hits"  # not a strict conversion, but a transliteration
+      data[:album].should == "Still on Top - The Greatest Hits".force_encoding('ISO-8859-1')  # not a strict conversion, but a transliteration
     end
 
-    it 'should convert UTF-8 album titles to ISO-8859-1 even if the album key is not a simple downcased symbol' do
+    it 'should result in ISO-8859-1 album titles even if the album key is not a simple downcased symbol' do
       @tags['ALBUM'] = "Still on Top \342\200\224 The Greatest Hits"
 
       data = @flac2mp3.get_flacdata(@filename)
-      data[:album].should == "Still on Top - The Greatest Hits"  # not a strict conversion, but a transliteration
+      data[:album].should == "Still on Top - The Greatest Hits".force_encoding('ISO-8859-1')  # not a strict conversion, but a transliteration
     end
   end
 
