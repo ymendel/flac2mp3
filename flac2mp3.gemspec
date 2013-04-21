@@ -7,7 +7,7 @@ Gem::Specification.new do |gem|
   gem.description = %q{A simple converter for FLAC to MP3.}
   gem.email = ['ymendel@pobox.com']
   gem.executables = ['flac2mp3', 'metaflac2mp3']
-  gem.files = Dir['License.txt', 'History.txt', 'README.txt', 'lib/**/*', 'spec/**/*', 'bin/**/*']
+  gem.files = Dir['License.txt', 'History.txt', 'README.md', 'lib/**/*', 'spec/**/*', 'bin/**/*']
   gem.homepage = 'http://github.com/ymendel/one_inch_punch/'
   gem.name = 'flac2mp3'
   gem.require_paths = ['lib']
