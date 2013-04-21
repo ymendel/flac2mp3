@@ -1,3 +1,8 @@
+== 0.4.2 2013-04-21
+
+* 1 tiny enhancement:
+  * Including README in gemspec again
+
 == 0.4.1 2013-04-20
 
 * 1 tiny enhancement:

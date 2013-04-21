@@ -12,5 +12,5 @@ Gem::Specification.new do |gem|
   gem.name = 'flac2mp3'
   gem.require_paths = ['lib']
   gem.summary = %q{convert FLAC to MP3}
-  gem.version = '0.4.1'
+  gem.version = '0.4.2'
 end
