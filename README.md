@@ -30,6 +30,10 @@ If neither of those commands will work for you, try using a different OS.
     $ flac2mp3 flac_filename --silent
     $ flac2mp3 --meta flac_filename mp3_filename
 
+or with lame options
+
+    $ flac2mp3 flac_filename -e "-b 320"
+
 (or)
 
     $ metaflac2mp3 flac_filename mp3_filename
